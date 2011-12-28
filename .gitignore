@@ -1,0 +1,9 @@
+*.class
+*.so
+*/bin
+*/build
+*/obj
+*/gen
+ant.properties
+local.properties
+latinime/libs
