@@ -18,8 +18,8 @@ package com.android.inputmethod.deprecated;
 
 import com.android.inputmethod.compat.InputMethodManagerCompatWrapper;
 import com.android.inputmethod.deprecated.languageswitcher.LanguageSwitcher;
-import com.android.inputmethod.latin.LatinIME;
-import com.android.inputmethod.latin.Settings;
+import com.sugree.inputmethod.latin.LatinIME;
+import com.sugree.inputmethod.latin.Settings;
 
 import android.content.SharedPreferences;
 import android.content.res.Configuration;

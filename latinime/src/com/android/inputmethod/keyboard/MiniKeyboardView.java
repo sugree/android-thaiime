@@ -25,7 +25,7 @@ import android.widget.PopupWindow;
 
 import com.android.inputmethod.keyboard.PointerTracker.DrawingProxy;
 import com.android.inputmethod.keyboard.PointerTracker.TimerProxy;
-import com.android.inputmethod.latin.R;
+import com.sugree.inputmethod.latin.R;
 
 /**
  * A view that renders a virtual {@link MiniKeyboard}. It handles rendering of keys and detecting

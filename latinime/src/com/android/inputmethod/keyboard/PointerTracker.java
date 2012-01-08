@@ -23,8 +23,8 @@ import android.view.MotionEvent;
 import android.widget.TextView;
 
 import com.android.inputmethod.keyboard.internal.PointerTrackerQueue;
-import com.android.inputmethod.latin.LatinImeLogger;
-import com.android.inputmethod.latin.R;
+import com.sugree.inputmethod.latin.R;
+import com.sugree.inputmethod.latin.LatinImeLogger;
 
 import java.util.ArrayList;
 import java.util.Arrays;

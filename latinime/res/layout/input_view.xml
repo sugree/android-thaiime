@@ -18,9 +18,9 @@
 */
 -->
 
-<com.android.inputmethod.latin.InputView
+<com.sugree.inputmethod.latin.InputView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:latin="http://schemas.android.com/apk/res/com.android.inputmethod.latin"
+    xmlns:latin="http://schemas.android.com/apk/res/com.sugree.inputmethod.latin"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -43,7 +43,7 @@
             android:layout_width="@dimen/suggestions_strip_padding"
             android:layout_height="@dimen/suggestions_strip_height"
             style="?attr/suggestionsStripBackgroundStyle" />
-        <com.android.inputmethod.latin.SuggestionsView
+        <com.sugree.inputmethod.latin.SuggestionsView
             android:id="@+id/suggestions_view"
             android:layout_weight="1.0"
             android:layout_width="0dp"
@@ -61,4 +61,4 @@
         android:layout_alignParentBottom="true"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
-</com.android.inputmethod.latin.InputView>
+</com.sugree.inputmethod.latin.InputView>

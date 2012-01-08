@@ -21,7 +21,7 @@ import android.graphics.drawable.Drawable;
 import com.android.inputmethod.keyboard.Key;
 import com.android.inputmethod.keyboard.Keyboard;
 import com.android.inputmethod.keyboard.KeyboardId;
-import com.android.inputmethod.latin.LatinImeLogger;
+import com.sugree.inputmethod.latin.LatinImeLogger;
 
 import java.util.ArrayList;
 import java.util.HashMap;

@@ -25,7 +25,7 @@ import android.view.inputmethod.InputMethodSubtype;
 
 import com.android.inputmethod.deprecated.LanguageSwitcherProxy;
 import com.android.inputmethod.keyboard.KeyboardSwitcher;
-import com.android.inputmethod.latin.SubtypeSwitcher;
+import com.sugree.inputmethod.latin.SubtypeSwitcher;
 
 public class InputMethodServiceCompatWrapper extends InputMethodService {
     // CAN_HANDLE_ON_CURRENT_INPUT_METHOD_SUBTYPE_CHANGED needs to be false if the API level is 10

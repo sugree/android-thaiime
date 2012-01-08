@@ -30,9 +30,9 @@ import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
 
 import com.android.inputmethod.deprecated.LanguageSwitcherProxy;
-import com.android.inputmethod.latin.R;
-import com.android.inputmethod.latin.SubtypeSwitcher;
-import com.android.inputmethod.latin.Utils;
+import com.sugree.inputmethod.latin.R;
+import com.sugree.inputmethod.latin.SubtypeSwitcher;
+import com.sugree.inputmethod.latin.Utils;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;

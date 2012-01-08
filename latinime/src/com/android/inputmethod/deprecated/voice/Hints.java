@@ -17,7 +17,7 @@
 package com.android.inputmethod.deprecated.voice;
 
 import com.android.inputmethod.compat.SharedPreferencesCompat;
-import com.android.inputmethod.latin.R;
+import com.sugree.inputmethod.latin.R;
 
 import android.content.ContentResolver;
 import android.content.Context;

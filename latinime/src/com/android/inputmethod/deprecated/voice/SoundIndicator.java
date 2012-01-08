@@ -30,7 +30,7 @@ import android.os.Handler;
 import android.util.AttributeSet;
 import android.widget.ImageView;
 
-import com.android.inputmethod.latin.R;
+import com.sugree.inputmethod.latin.R;
 
 /**
  * A widget which shows the volume of audio using a microphone icon

@@ -34,9 +34,9 @@ import android.text.TextUtils;
 import com.android.inputmethod.compat.InputMethodManagerCompatWrapper;
 import com.android.inputmethod.keyboard.internal.KeyboardBuilder;
 import com.android.inputmethod.keyboard.internal.KeyboardParams;
-import com.android.inputmethod.latin.R;
-import com.android.inputmethod.latin.SubtypeSwitcher;
-import com.android.inputmethod.latin.Utils;
+import com.sugree.inputmethod.latin.R;
+import com.sugree.inputmethod.latin.SubtypeSwitcher;
+import com.sugree.inputmethod.latin.Utils;
 
 import java.util.Arrays;
 import java.util.HashMap;

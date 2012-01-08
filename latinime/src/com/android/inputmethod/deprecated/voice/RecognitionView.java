@@ -16,9 +16,9 @@
 
 package com.android.inputmethod.deprecated.voice;
 
-import com.android.inputmethod.latin.R;
-import com.android.inputmethod.latin.SubtypeSwitcher;
-import com.android.inputmethod.latin.Utils;
+import com.sugree.inputmethod.latin.R;
+import com.sugree.inputmethod.latin.SubtypeSwitcher;
+import com.sugree.inputmethod.latin.Utils;
 
 import android.content.Context;
 import android.content.res.Resources;

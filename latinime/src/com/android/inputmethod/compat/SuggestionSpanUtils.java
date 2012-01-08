@@ -16,9 +16,9 @@
 
 package com.android.inputmethod.compat;
 
-import com.android.inputmethod.latin.LatinImeLogger;
-import com.android.inputmethod.latin.SuggestedWords;
-import com.android.inputmethod.latin.SuggestionSpanPickedNotificationReceiver;
+import com.sugree.inputmethod.latin.LatinImeLogger;
+import com.sugree.inputmethod.latin.SuggestedWords;
+import com.sugree.inputmethod.latin.SuggestionSpanPickedNotificationReceiver;
 
 import android.content.Context;
 import android.text.Spannable;

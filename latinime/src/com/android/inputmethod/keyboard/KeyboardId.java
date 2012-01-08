@@ -20,7 +20,7 @@ import android.view.inputmethod.EditorInfo;
 
 import com.android.inputmethod.compat.EditorInfoCompatUtils;
 import com.android.inputmethod.compat.InputTypeCompatUtils;
-import com.android.inputmethod.latin.R;
+import com.sugree.inputmethod.latin.R;
 
 import java.util.Arrays;
 import java.util.Locale;

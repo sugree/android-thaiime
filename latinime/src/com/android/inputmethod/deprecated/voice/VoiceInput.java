@@ -16,10 +16,10 @@
 
 package com.android.inputmethod.deprecated.voice;
 
-import com.android.inputmethod.latin.EditingUtils;
-import com.android.inputmethod.latin.LatinImeLogger;
-import com.android.inputmethod.latin.R;
-import com.android.inputmethod.latin.StaticInnerHandlerWrapper;
+import com.sugree.inputmethod.latin.R;
+import com.sugree.inputmethod.latin.EditingUtils;
+import com.sugree.inputmethod.latin.LatinImeLogger;
+import com.sugree.inputmethod.latin.StaticInnerHandlerWrapper;
 
 import android.content.ContentResolver;
 import android.content.Context;

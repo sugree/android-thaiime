@@ -23,7 +23,7 @@ import android.text.TextUtils;
 import com.android.inputmethod.keyboard.Key;
 import com.android.inputmethod.keyboard.Keyboard;
 import com.android.inputmethod.keyboard.KeyboardId;
-import com.android.inputmethod.latin.R;
+import com.sugree.inputmethod.latin.R;
 
 import java.util.HashMap;
 

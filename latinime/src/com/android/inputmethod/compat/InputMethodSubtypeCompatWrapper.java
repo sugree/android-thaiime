@@ -21,7 +21,7 @@ import android.content.pm.ApplicationInfo;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.android.inputmethod.latin.LatinImeLogger;
+import com.sugree.inputmethod.latin.LatinImeLogger;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;

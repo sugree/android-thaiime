@@ -38,10 +38,10 @@ import com.android.inputmethod.accessibility.AccessibleKeyboardViewProxy;
 import com.android.inputmethod.deprecated.VoiceProxy;
 import com.android.inputmethod.keyboard.PointerTracker.DrawingProxy;
 import com.android.inputmethod.keyboard.PointerTracker.TimerProxy;
-import com.android.inputmethod.latin.LatinIME;
-import com.android.inputmethod.latin.R;
-import com.android.inputmethod.latin.StaticInnerHandlerWrapper;
-import com.android.inputmethod.latin.Utils;
+import com.sugree.inputmethod.latin.R;
+import com.sugree.inputmethod.latin.LatinIME;
+import com.sugree.inputmethod.latin.StaticInnerHandlerWrapper;
+import com.sugree.inputmethod.latin.Utils;
 
 import java.util.WeakHashMap;
 

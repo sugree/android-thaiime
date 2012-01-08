@@ -31,7 +31,7 @@ import com.android.inputmethod.keyboard.internal.KeyboardBuilder.ParseException;
 import com.android.inputmethod.keyboard.internal.KeyboardIconsSet;
 import com.android.inputmethod.keyboard.internal.KeyboardParams;
 import com.android.inputmethod.keyboard.internal.MoreKeySpecParser;
-import com.android.inputmethod.latin.R;
+import com.sugree.inputmethod.latin.R;
 
 import org.xmlpull.v1.XmlPullParser;
 

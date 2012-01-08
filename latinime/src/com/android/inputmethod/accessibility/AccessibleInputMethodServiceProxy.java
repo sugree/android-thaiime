@@ -28,8 +28,8 @@ import android.view.KeyEvent;
 import android.view.inputmethod.ExtractedText;
 import android.view.inputmethod.ExtractedTextRequest;
 
-import com.android.inputmethod.latin.R;
-import com.android.inputmethod.latin.StaticInnerHandlerWrapper;
+import com.sugree.inputmethod.latin.R;
+import com.sugree.inputmethod.latin.StaticInnerHandlerWrapper;
 
 public class AccessibleInputMethodServiceProxy implements AccessibleKeyboardActionListener {
     private static final AccessibleInputMethodServiceProxy sInstance =

@@ -33,7 +33,7 @@ public class CompatUtils {
     private static final String INPUT_METHOD_SUBTYPE_SETTINGS =
             "android.settings.INPUT_METHOD_SUBTYPE_SETTINGS";
     private static final String INPUT_LANGUAGE_SELECTION =
-            "com.android.inputmethod.latin.INPUT_LANGUAGE_SELECTION";
+            "com.sugree.inputmethod.latin.INPUT_LANGUAGE_SELECTION";
 
     public static Intent getInputLanguageSelectionIntent(String inputMethodId,
             int flagsForSubtypeSettings) {

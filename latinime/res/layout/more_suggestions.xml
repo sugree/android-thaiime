@@ -24,8 +24,8 @@
         android:orientation="horizontal"
         style="?attr/miniKeyboardPanelStyle"
         >
-    <com.android.inputmethod.latin.MoreSuggestionsView
-            xmlns:latin="http://schemas.android.com/apk/res/com.android.inputmethod.latin"
+    <com.sugree.inputmethod.latin.MoreSuggestionsView
+            xmlns:latin="http://schemas.android.com/apk/res/com.sugree.inputmethod.latin"
             android:id="@+id/more_suggestions_view"
             android:layout_alignParentBottom="true"
             android:layout_width="wrap_content"

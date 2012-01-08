@@ -20,7 +20,7 @@ import android.content.res.Resources;
 import android.test.AndroidTestCase;
 
 import com.android.inputmethod.keyboard.Keyboard;
-import com.android.inputmethod.latin.R;
+import com.sugree.inputmethod.latin.R;
 
 public class MoreKeySpecParserTests extends AndroidTestCase {
     private Resources mRes;

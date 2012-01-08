@@ -21,8 +21,8 @@ import android.os.Build;
 import android.util.Log;
 import android.view.MotionEvent;
 
-import com.android.inputmethod.latin.LatinImeLogger;
-import com.android.inputmethod.latin.R;
+import com.sugree.inputmethod.latin.R;
+import com.sugree.inputmethod.latin.LatinImeLogger;
 
 public class SuddenJumpingTouchEventHandler {
     private static final String TAG = SuddenJumpingTouchEventHandler.class.getSimpleName();

@@ -18,11 +18,11 @@ package com.android.inputmethod.deprecated.languageswitcher;
 
 import com.android.inputmethod.compat.SharedPreferencesCompat;
 import com.android.inputmethod.keyboard.internal.KeyboardBuilder;
-import com.android.inputmethod.latin.DictionaryFactory;
-import com.android.inputmethod.latin.LocaleUtils;
-import com.android.inputmethod.latin.R;
-import com.android.inputmethod.latin.Settings;
-import com.android.inputmethod.latin.Utils;
+import com.sugree.inputmethod.latin.R;
+import com.sugree.inputmethod.latin.DictionaryFactory;
+import com.sugree.inputmethod.latin.LocaleUtils;
+import com.sugree.inputmethod.latin.Settings;
+import com.sugree.inputmethod.latin.Utils;
 
 import org.xmlpull.v1.XmlPullParserException;
 

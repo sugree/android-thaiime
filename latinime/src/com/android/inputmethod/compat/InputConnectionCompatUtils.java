@@ -16,7 +16,7 @@
 
 package com.android.inputmethod.compat;
 
-import com.android.inputmethod.latin.EditingUtils.SelectedWord;
+import com.sugree.inputmethod.latin.EditingUtils.SelectedWord;
 
 import android.view.inputmethod.InputConnection;
 

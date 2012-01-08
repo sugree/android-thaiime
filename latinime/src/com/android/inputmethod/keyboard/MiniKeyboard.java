@@ -21,7 +21,7 @@ import android.graphics.Paint;
 import com.android.inputmethod.keyboard.internal.KeyboardBuilder;
 import com.android.inputmethod.keyboard.internal.KeyboardParams;
 import com.android.inputmethod.keyboard.internal.MoreKeySpecParser;
-import com.android.inputmethod.latin.R;
+import com.sugree.inputmethod.latin.R;
 
 public class MiniKeyboard extends Keyboard {
     private final int mDefaultKeyCoordX;

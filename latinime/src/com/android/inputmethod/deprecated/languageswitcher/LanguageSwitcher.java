@@ -17,10 +17,10 @@
 package com.android.inputmethod.deprecated.languageswitcher;
 
 import com.android.inputmethod.compat.SharedPreferencesCompat;
-import com.android.inputmethod.latin.LatinIME;
-import com.android.inputmethod.latin.LatinImeLogger;
-import com.android.inputmethod.latin.LocaleUtils;
-import com.android.inputmethod.latin.Settings;
+import com.sugree.inputmethod.latin.LatinIME;
+import com.sugree.inputmethod.latin.LatinImeLogger;
+import com.sugree.inputmethod.latin.LocaleUtils;
+import com.sugree.inputmethod.latin.Settings;
 
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;

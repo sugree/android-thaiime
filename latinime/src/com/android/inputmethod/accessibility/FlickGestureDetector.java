@@ -23,7 +23,7 @@ import android.view.ViewConfiguration;
 
 import com.android.inputmethod.compat.MotionEventCompatUtils;
 import com.android.inputmethod.keyboard.PointerTracker;
-import com.android.inputmethod.latin.StaticInnerHandlerWrapper;
+import com.sugree.inputmethod.latin.StaticInnerHandlerWrapper;
 
 /**
  * Detects flick gestures within a stream of hover events.

@@ -20,7 +20,7 @@ import android.content.res.TypedArray;
 import android.util.Log;
 
 import com.android.inputmethod.keyboard.internal.KeyboardBuilder.ParseException;
-import com.android.inputmethod.latin.R;
+import com.sugree.inputmethod.latin.R;
 
 import org.xmlpull.v1.XmlPullParser;
 

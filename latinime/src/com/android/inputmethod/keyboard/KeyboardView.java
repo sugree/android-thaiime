@@ -39,9 +39,9 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.android.inputmethod.compat.FrameLayoutCompatUtils;
-import com.android.inputmethod.latin.LatinImeLogger;
-import com.android.inputmethod.latin.R;
-import com.android.inputmethod.latin.StaticInnerHandlerWrapper;
+import com.sugree.inputmethod.latin.R;
+import com.sugree.inputmethod.latin.LatinImeLogger;
+import com.sugree.inputmethod.latin.StaticInnerHandlerWrapper;
 
 import java.util.HashMap;
 
