@@ -1,9 +1,17 @@
+.metadata
+.project
+.settings
+.classpath
 *.class
 *.so
 */bin
 */build
 */obj
 */gen
+*/*/bin
+*/*/build
+*/*/obj
+*/*/gen
 ant.properties
 local.properties
 latinime/libs

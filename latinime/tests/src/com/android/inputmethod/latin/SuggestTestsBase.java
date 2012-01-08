@@ -35,7 +35,7 @@ public class SuggestTestsBase extends AndroidTestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        mTestPackageFile = new File(getTestContext().getApplicationInfo().sourceDir);
+        mTestPackageFile = new File(getContext().getApplicationInfo().sourceDir);
     }
 
     protected KeyboardId createKeyboardId(Locale locale, int orientation) {
@@ -57,11 +57,11 @@ public class SuggestTestsBase extends AndroidTestCase {
     }
 
     protected InputStream openTestRawResource(int resIdInTest) {
-        return getTestContext().getResources().openRawResource(resIdInTest);
+        return getContext().getResources().openRawResource(resIdInTest);
     }
 
     protected AssetFileDescriptor openTestRawResourceFd(int resIdInTest) {
-        return getTestContext().getResources().openRawResourceFd(resIdInTest);
+        return getContext().getResources().openRawResourceFd(resIdInTest);
     }
 
     private static String format(String message, Object expected, Object actual) {
