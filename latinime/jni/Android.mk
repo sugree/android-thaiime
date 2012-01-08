@@ -41,7 +41,7 @@ ifeq ($(TARGETING_UNBUNDLED_FROYO), true)
     LOCAL_SDK_VERSION := 8
 endif
 
-LOCAL_MODULE := libjni_latinime
+LOCAL_MODULE := libjni_thaiime
 
 LOCAL_MODULE_TAGS := user
 
