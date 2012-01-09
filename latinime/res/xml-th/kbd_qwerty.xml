@@ -20,8 +20,8 @@
 
 <Keyboard
     xmlns:latin="http://schemas.android.com/apk/res/com.sugree.inputmethod.latin"
-    latin:keyboardLocale="ru"
+    latin:keyboardLocale="th"
 >
     <include
-        latin:keyboardLayout="@xml/kbd_rows_russian" />
+        latin:keyboardLayout="@xml/kbd_rows_thai" />
 </Keyboard>
