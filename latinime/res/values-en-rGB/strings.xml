@@ -21,12 +21,14 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="english_ime_name" msgid="7252517407088836577">"Android keyboard"</string>
+    <string name="aosp_android_keyboard_ime_name" msgid="7877134937939182296">"Android keyboard (AOSP)"</string>
     <string name="english_ime_settings" msgid="6661589557206947774">"Android keyboard settings"</string>
     <string name="english_ime_input_options" msgid="3909945612939668554">"Input options"</string>
-    <string name="spell_checker_service_name" msgid="2003013122022285508">"Android correction"</string>
+    <string name="spell_checker_service_name" msgid="7338064335159755926">"Android spell checker"</string>
+    <string name="aosp_spell_checker_service_name" msgid="6985142605330377819">"Android spell checker (AOSP)"</string>
     <string name="android_spell_checker_settings" msgid="5822324635435443689">"Spellchecking settings"</string>
-    <string name="use_proximity_option_title" msgid="7469233942295924620">"Use proximity data"</string>
-    <string name="use_proximity_option_summary" msgid="2857708859847261945">"Use a keyboard-like proximity algorithm for spellchecking"</string>
+    <string name="use_contacts_for_spellchecking_option_title" msgid="5374120998125353898">"Look up contact names"</string>
+    <string name="use_contacts_for_spellchecking_option_summary" msgid="8754413382543307713">"Spell checker uses entries from your contact list"</string>
     <string name="vibrate_on_keypress" msgid="5258079494276955460">"Vibrate on key-press"</string>
     <string name="sound_on_keypress" msgid="6093592297198243644">"Sound on key-press"</string>
     <string name="popup_on_keypress" msgid="123894815723512944">"Pop-up on key press"</string>
@@ -34,7 +36,10 @@
     <string name="correction_category" msgid="2236750915056607613">"Text correction"</string>
     <string name="misc_category" msgid="6894192814868233453">"Other Options"</string>
     <string name="advanced_settings" msgid="362895144495591463">"Advanced settings"</string>
-    <string name="advanced_settings_summary" msgid="5193513161106637254">"Options for expert users"</string>
+    <string name="advanced_settings_summary" msgid="4487980456152830271">"Options for experts"</string>
+    <string name="include_other_imes_in_language_switch_list" msgid="4533689960308565519">"Switch to other input methods"</string>
+    <string name="include_other_imes_in_language_switch_list_summary" msgid="840637129103317635">"Language switch key also covers other input methods"</string>
+    <string name="suppress_language_switch_key" msgid="8003788410354806368">"Suppress language switch key"</string>
     <string name="key_preview_popup_dismiss_delay" msgid="6213164897443068248">"Key pop-up dismiss delay"</string>
     <string name="key_preview_popup_dismiss_no_delay" msgid="2096123151571458064">"No delay"</string>
     <string name="key_preview_popup_dismiss_default_delay" msgid="2166964333903906734">"Default"</string>
@@ -48,22 +53,22 @@
     <string name="prefs_show_suggestions" msgid="8026799663445531637">"Show correction suggestions"</string>
     <string name="prefs_show_suggestions_summary" msgid="1583132279498502825">"Display suggested words while typing"</string>
     <string name="prefs_suggestion_visibility_show_name" msgid="3219916594067551303">"Always show"</string>
-    <string name="prefs_suggestion_visibility_show_only_portrait_name" msgid="3551821800439659812">"Show on portrait mode"</string>
+    <string name="prefs_suggestion_visibility_show_only_portrait_name" msgid="3551821800439659812">"Show in portrait mode"</string>
     <string name="prefs_suggestion_visibility_hide_name" msgid="6309143926422234673">"Always hide"</string>
-    <string name="prefs_settings_key" msgid="4623341240804046498">"Show settings key"</string>
     <string name="auto_correction" msgid="4979925752001319458">"Auto-correction"</string>
-    <string name="auto_correction_summary" msgid="5625751551134658006">"Spacebar and punctuation correct mistyped words automatically"</string>
+    <string name="auto_correction_summary" msgid="5625751551134658006">"Correct mistyped words automatically with spacebar and punctuation"</string>
     <string name="auto_correction_threshold_mode_off" msgid="8470882665417944026">"Off"</string>
     <string name="auto_correction_threshold_mode_modest" msgid="8788366690620799097">"Modest"</string>
     <string name="auto_correction_threshold_mode_aggeressive" msgid="3524029103734923819">"Aggressive"</string>
     <string name="auto_correction_threshold_mode_very_aggeressive" msgid="3386782235540547678">"Very aggressive"</string>
-    <string name="bigram_suggestion" msgid="2636414079905220518">"Bigram Suggestions"</string>
-    <string name="bigram_suggestion_summary" msgid="4383845146070101531">"Use previous word to improve suggestion"</string>
-    <string name="bigram_prediction" msgid="8914273444762259739">"Bigram prediction"</string>
+    <string name="bigram_suggestion" msgid="8169311444438922902">"Next word suggestions"</string>
+    <string name="bigram_suggestion_summary" msgid="6635527607242625713">"Use previous word to improve suggestion"</string>
+    <string name="bigram_prediction" msgid="3216364899483135294">"Next word prediction"</string>
     <string name="bigram_prediction_summary" msgid="1747261921174300098">"Use previous word also for prediction"</string>
     <string name="added_word" msgid="8993883354622484372">"<xliff:g id="WORD">%s</xliff:g> : Saved"</string>
     <string name="label_go_key" msgid="1635148082137219148">"Go"</string>
     <string name="label_next_key" msgid="362972844525672568">"Next"</string>
+    <string name="label_previous_key" msgid="1211868118071386787">"Prev"</string>
     <string name="label_done_key" msgid="2441578748772529288">"Done"</string>
     <string name="label_send_key" msgid="2815056534433717444">"Send"</string>
     <string name="label_to_alpha_key" msgid="4793983863798817523">"ABC"</string>
@@ -76,8 +81,8 @@
     <string name="spoken_no_text_entered" msgid="7479685225597344496">"No text entered"</string>
     <string name="spoken_description_unknown" msgid="3197434010402179157">"Key code %d"</string>
     <string name="spoken_description_shift" msgid="244197883292549308">"Shift"</string>
-    <string name="spoken_description_shift_shifted" msgid="954941524766465022">"Shift enabled"</string>
-    <string name="spoken_description_caps_lock" msgid="5660626444912131764">"Caps lock enabled"</string>
+    <string name="spoken_description_shift_shifted" msgid="1681877323344195035">"Shift on (tap to disable)"</string>
+    <string name="spoken_description_caps_lock" msgid="3276478269526304432">"Caps lock on (tap to disable)"</string>
     <string name="spoken_description_delete" msgid="8740376944276199801">"Delete"</string>
     <string name="spoken_description_to_symbol" msgid="5486340107500448969">"Symbols"</string>
     <string name="spoken_description_to_alpha" msgid="23129338819771807">"Letters"</string>
@@ -88,46 +93,15 @@
     <string name="spoken_description_mic" msgid="615536748882611950">"Voice input"</string>
     <string name="spoken_description_smiley" msgid="2256309826200113918">"Smiley face"</string>
     <string name="spoken_description_return" msgid="8178083177238315647">"Return"</string>
-    <string name="spoken_description_comma" msgid="4970844442999724586">"Comma"</string>
-    <string name="spoken_description_period" msgid="5286614628077903945">"Full stop"</string>
-    <string name="spoken_description_left_parenthesis" msgid="8524822120595052415">"Left parenthesis"</string>
-    <string name="spoken_description_right_parenthesis" msgid="1085757995851933164">"Right parenthesis"</string>
-    <string name="spoken_description_colon" msgid="4312420908484277077">"Colon"</string>
-    <string name="spoken_description_semicolon" msgid="37737920987155179">"Semi-colon"</string>
-    <string name="spoken_description_exclamation_mark" msgid="2625684427460737157">"Exclamation mark"</string>
-    <string name="spoken_description_question_mark" msgid="7074097784255379666">"Question mark"</string>
-    <string name="spoken_description_double_quote" msgid="5485320575389905967">"Double quote"</string>
-    <string name="spoken_description_single_quote" msgid="4451320362665463938">"Single quote"</string>
+    <string name="spoken_description_search" msgid="1247236163755920808">"Search"</string>
     <string name="spoken_description_dot" msgid="40711082435231673">"Dot"</string>
-    <string name="spoken_description_square_root" msgid="190595160284757811">"Square root"</string>
-    <string name="spoken_description_pi" msgid="4554418247799952239">"Pi"</string>
-    <string name="spoken_description_delta" msgid="3607948313655721579">"Delta"</string>
-    <string name="spoken_description_trademark" msgid="475877774077871369">"Trademark"</string>
-    <string name="spoken_description_care_of" msgid="7492800237237796530">"Care of"</string>
-    <string name="spoken_description_star" msgid="1009742725387231977">"Star"</string>
-    <string name="spoken_description_pound" msgid="5530577649206922631">"Pound"</string>
-    <string name="spoken_description_ellipsis" msgid="1687670869947652062">"Ellipsis"</string>
-    <string name="spoken_description_low_double_quote" msgid="3551394572784840975">"Low double quote"</string>
-    <string name="voice_warning_title" msgid="4419354150908395008">"Voice input"</string>
-    <string name="voice_warning_locale_not_supported" msgid="637923019716442333">"Voice input is not currently supported for your language, but does work in English."</string>
-    <string name="voice_warning_may_not_understand" msgid="5596289095878251072">"Voice input uses Google\'s speech recognition. "<a href="http://m.google.com/privacy">"The Mobile Privacy Policy"</a>" applies."</string>
-    <string name="voice_warning_how_to_turn_off" msgid="3190378129944934856">"To turn off voice input, go to input method settings."</string>
-    <string name="voice_hint_dialog_message" msgid="1420686286820661548">"To use voice input, press the microphone button."</string>
-    <string name="voice_listening" msgid="467518160751321844">"Speak now"</string>
-    <string name="voice_working" msgid="6666937792815731889">"Working"</string>
-    <string name="voice_initializing" msgid="661962047129906646"></string>
-    <string name="voice_error" msgid="5140896300312186162">"Error: Please try again."</string>
-    <string name="voice_network_error" msgid="6649556447401862563">"Couldn\'t connect"</string>
-    <string name="voice_too_much_speech" msgid="5746973620134227376">"Error, too much speech."</string>
-    <string name="voice_audio_error" msgid="5072707727016414454">"Audio problem"</string>
-    <string name="voice_server_error" msgid="7807129913977261644">"Server error"</string>
-    <string name="voice_speech_timeout" msgid="8461817525075498795">"No speech heard"</string>
-    <string name="voice_no_match" msgid="4285117547030179174">"No matches found"</string>
-    <string name="voice_not_installed" msgid="5552450909753842415">"Voice search not installed"</string>
-    <string name="voice_swipe_hint" msgid="6943546180310682021"><b>"Hint:"</b>" Swipe across keyboard to speak"</string>
-    <string name="voice_punctuation_hint" msgid="1611389463237317754"><b>"Hint:"</b>" Next time, try speaking punctuation marks, like \"full stop\", \"comma\" or \"question mark\"."</string>
-    <string name="cancel" msgid="6830980399865683324">"Cancel"</string>
-    <string name="ok" msgid="7898366843681727667">"OK"</string>
+    <string name="spoken_description_shiftmode_on" msgid="5700440798609574589">"Shift enabled"</string>
+    <string name="spoken_description_shiftmode_locked" msgid="593175803181701830">"Caps lock enabled"</string>
+    <string name="spoken_description_shiftmode_off" msgid="657219998449174808">"Shift disabled"</string>
+    <string name="spoken_description_mode_symbol" msgid="7183343879909747642">"Symbols mode"</string>
+    <string name="spoken_description_mode_alpha" msgid="3528307674390156956">"Letters mode"</string>
+    <string name="spoken_description_mode_phone" msgid="6520207943132026264">"Phone mode"</string>
+    <string name="spoken_description_mode_phone_shift" msgid="5499629753962641227">"Phone symbols mode"</string>
     <string name="voice_input" msgid="3583258583521397548">"Voice input key"</string>
     <string name="voice_input_modes_main_keyboard" msgid="3360660341121083174">"On main keyboard"</string>
     <string name="voice_input_modes_symbols_keyboard" msgid="7203213240786084067">"On symbols keyboard"</string>
@@ -135,18 +109,36 @@
     <string name="voice_input_modes_summary_main_keyboard" msgid="6586544292900314339">"Mic on main keyboard"</string>
     <string name="voice_input_modes_summary_symbols_keyboard" msgid="5233725927281932391">"Mic on symbols keyboard"</string>
     <string name="voice_input_modes_summary_off" msgid="63875609591897607">"Voice input is disabled"</string>
-    <string name="selectInputMethod" msgid="315076553378705821">"Select input method"</string>
     <string name="configure_input_method" msgid="373356270290742459">"Configure input methods"</string>
     <string name="language_selection_title" msgid="1651299598555326750">"Input languages"</string>
     <string name="select_language" msgid="3693815588777926848">"Input languages"</string>
-    <string name="hint_add_to_dictionary" msgid="9006292060636342317">"← Touch again to save"</string>
+    <string name="hint_add_to_dictionary" msgid="573678656946085380">"Touch again to save"</string>
     <string name="has_dictionary" msgid="6071847973466625007">"Dictionary available"</string>
     <string name="prefs_enable_log" msgid="6620424505072963557">"Enable user feedback"</string>
     <string name="prefs_description_log" msgid="5827825607258246003">"Help improve this input method editor by sending usage statistics and crash reports automatically to Google."</string>
     <string name="keyboard_layout" msgid="8451164783510487501">"Keyboard theme"</string>
-    <string name="subtype_de_qwerty" msgid="3358900499589259491">"German QWERTY"</string>
     <string name="subtype_en_GB" msgid="88170601942311355">"English (UK)"</string>
     <string name="subtype_en_US" msgid="6160452336634534239">"English (US)"</string>
+    <string name="subtype_with_layout_en_GB" msgid="2179097748724725906">"English (UK) (<xliff:g id="LAYOUT">%s</xliff:g>)"</string>
+    <string name="subtype_with_layout_en_US" msgid="1362581347576714579">"English (US) (<xliff:g id="LAYOUT">%s</xliff:g>)"</string>
+    <string name="subtype_no_language" msgid="141420857808801746">"No language"</string>
+    <string name="subtype_no_language_qwerty" msgid="2956121451616633133">"No language (QWERTY)"</string>
+    <string name="subtype_no_language_qwertz" msgid="1177848172397202890">"No language (QWERTZ)"</string>
+    <string name="subtype_no_language_azerty" msgid="8721460968141187394">"No language (AZERTY)"</string>
+    <string name="subtype_no_language_dvorak" msgid="3122976737669823935">"No language (Dvorak)"</string>
+    <string name="subtype_no_language_colemak" msgid="4205992994906097244">"No language (Colemak)"</string>
+    <string name="subtype_no_language_pcqwerty" msgid="8840928374394180189">"No language (PC)"</string>
+    <string name="custom_input_styles_title" msgid="8429952441821251512">"Custom input styles"</string>
+    <string name="add_style" msgid="6163126614514489951">"Add style"</string>
+    <string name="add" msgid="8299699805688017798">"Add"</string>
+    <string name="remove" msgid="4486081658752944606">"Remove"</string>
+    <string name="save" msgid="7646738597196767214">"Save"</string>
+    <string name="subtype_locale" msgid="8576443440738143764">"Language"</string>
+    <string name="keyboard_layout_set" msgid="4309233698194565609">"Layout"</string>
+    <string name="custom_input_style_note_message" msgid="8826731320846363423">"Your custom input style needs to be enabled before you start using it. Do you want to enable it now?"</string>
+    <string name="enable" msgid="5031294444630523247">"Enable"</string>
+    <string name="not_now" msgid="6172462888202790482">"Not now"</string>
+    <string name="custom_input_style_already_exists" msgid="8008728952215449707">"The same input style already exists: <xliff:g id="INPUT_STYLE_NAME">%s</xliff:g>"</string>
     <string name="prefs_usability_study_mode" msgid="1261130555134595254">"Usability study mode"</string>
     <string name="prefs_keypress_vibration_duration_settings" msgid="1829950405285211668">"Key-press vibration duration settings"</string>
     <string name="prefs_keypress_sound_volume_settings" msgid="5875933757082305040">"Key-press sound volume settings"</string>

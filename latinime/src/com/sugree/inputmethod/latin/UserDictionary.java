@@ -18,12 +18,10 @@ package com.sugree.inputmethod.latin;
 
 import android.content.ContentProviderClient;
 import android.content.ContentResolver;
-import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.database.ContentObserver;
 import android.database.Cursor;
-import android.net.Uri;
-import android.os.RemoteException;
 import android.provider.UserDictionary.Words;
 import android.text.TextUtils;
 
@@ -31,18 +29,26 @@ import com.android.inputmethod.keyboard.ProximityInfo;
 
 import java.util.Arrays;
 
+// TODO: This class is superseded by {@link UserBinaryDictionary}. Should be cleaned up.
+/**
+ * An expandable dictionary that stores the words in the user unigram dictionary.
+ *
+ * @deprecated Use {@link UserBinaryDictionary}.
+ */
+@Deprecated
 public class UserDictionary extends ExpandableDictionary {
 
+    // TODO: use Words.SHORTCUT when it's public in the SDK
+    final static String SHORTCUT = "shortcut";
     private static final String[] PROJECTION_QUERY = {
         Words.WORD,
+        SHORTCUT,
         Words.FREQUENCY,
     };
 
-    private static final String[] PROJECTION_ADD = {
-        Words._ID,
-        Words.FREQUENCY,
-        Words.LOCALE,
-    };
+    // This is not exported by the framework so we pretty much have to write it here verbatim
+    private static final String ACTION_USER_DICTIONARY_INSERT =
+            "com.android.settings.USER_DICTIONARY_INSERT";
 
     private ContentObserver mObserver;
     final private String mLocale;
@@ -134,7 +140,11 @@ public class UserDictionary extends ExpandableDictionary {
         final Cursor cursor = getContext().getContentResolver()
                 .query(Words.CONTENT_URI, PROJECTION_QUERY, request.toString(),
                         requestArguments, null);
-        addWords(cursor);
+        try {
+            addWords(cursor);
+        } finally {
+            if (null != cursor) cursor.close();
+        }
     }
 
     public boolean isEnabled() {
@@ -149,74 +159,38 @@ public class UserDictionary extends ExpandableDictionary {
     }
 
     /**
-     * Adds a word to the dictionary and makes it persistent.
+     * Adds a word to the user dictionary and makes it persistent.
+     *
+     * This will call upon the system interface to do the actual work through the intent
+     * readied by the system to this effect.
+     *
      * @param word the word to add. If the word is capitalized, then the dictionary will
      * recognize it as a capitalized word when searched.
      * @param frequency the frequency of occurrence of the word. A frequency of 255 is considered
      * the highest.
      * @TODO use a higher or float range for frequency
      */
-    @Override
-    public synchronized void addWord(final String word, final int frequency) {
+    public synchronized void addWordToUserDictionary(final String word, final int frequency) {
         // Force load the dictionary here synchronously
         if (getRequiresReload()) loadDictionaryAsync();
+        // TODO: do something for the UI. With the following, any sufficiently long word will
+        // look like it will go to the user dictionary but it won't.
         // Safeguard against adding long words. Can cause stack overflow.
         if (word.length() >= getMaxWordLength()) return;
 
-        super.addWord(word, frequency);
-
-        // Update the user dictionary provider
-        final ContentValues values = new ContentValues(5);
-        values.put(Words.WORD, word);
-        values.put(Words.FREQUENCY, frequency);
-        values.put(Words.LOCALE, mLocale);
-        values.put(Words.APP_ID, 0);
-
-        final ContentResolver contentResolver = getContext().getContentResolver();
-        final ContentProviderClient client =
-                contentResolver.acquireContentProviderClient(Words.CONTENT_URI);
-        if (null == client) return;
-        new Thread("addWord") {
-            @Override
-            public void run() {
-                Cursor cursor = null;
-                try {
-                    cursor = client.query(Words.CONTENT_URI, PROJECTION_ADD,
-                            "word=? and ((locale IS NULL) or (locale=?))",
-                                    new String[] { word, mLocale }, null);
-                    if (cursor != null && cursor.moveToFirst()) {
-                        final String locale = cursor.getString(cursor.getColumnIndex(Words.LOCALE));
-                        // If locale is null, we will not override the entry.
-                        if (locale != null && locale.equals(mLocale.toString())) {
-                            final long id = cursor.getLong(cursor.getColumnIndex(Words._ID));
-                            final Uri uri =
-                                    Uri.withAppendedPath(Words.CONTENT_URI, Long.toString(id));
-                            // Update the entry with new frequency value.
-                            client.update(uri, values, null, null);
-                        }
-                    } else {
-                        // Insert new entry.
-                        client.insert(Words.CONTENT_URI, values);
-                    }
-                } catch (RemoteException e) {
-                    // If we come here, the activity is already about to be killed, and we
-                    // have no means of contacting the content provider any more.
-                    // See ContentResolver#insert, inside the catch(){}
-                } finally {
-                    if (null != cursor) cursor.close();
-                    client.release();
-                }
-            }
-        }.start();
-
-        // In case the above does a synchronous callback of the change observer
-        setRequiresReload(false);
+        // TODO: Add an argument to the intent to specify the frequency.
+        Intent intent = new Intent(ACTION_USER_DICTIONARY_INSERT);
+        intent.putExtra(Words.WORD, word);
+        intent.putExtra(Words.LOCALE, mLocale);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        getContext().startActivity(intent);
     }
 
     @Override
-    public synchronized void getWords(final WordComposer codes, final WordCallback callback,
+    public synchronized void getWords(final WordComposer codes,
+            final CharSequence prevWordForBigrams, final WordCallback callback,
             final ProximityInfo proximityInfo) {
-        super.getWords(codes, callback, proximityInfo);
+        super.getWords(codes, prevWordForBigrams, callback, proximityInfo);
     }
 
     @Override
@@ -230,18 +204,22 @@ public class UserDictionary extends ExpandableDictionary {
         final int maxWordLength = getMaxWordLength();
         if (cursor.moveToFirst()) {
             final int indexWord = cursor.getColumnIndex(Words.WORD);
+            final int indexShortcut = cursor.getColumnIndex(SHORTCUT);
             final int indexFrequency = cursor.getColumnIndex(Words.FREQUENCY);
             while (!cursor.isAfterLast()) {
                 String word = cursor.getString(indexWord);
+                String shortcut = cursor.getString(indexShortcut);
                 int frequency = cursor.getInt(indexFrequency);
                 // Safeguard against adding really long words. Stack may overflow due
                 // to recursion
                 if (word.length() < maxWordLength) {
-                    super.addWord(word, frequency);
+                    super.addWord(word, null, frequency);
+                }
+                if (null != shortcut && shortcut.length() < maxWordLength) {
+                    super.addWord(shortcut, word, frequency);
                 }
                 cursor.moveToNext();
             }
         }
-        cursor.close();
     }
 }

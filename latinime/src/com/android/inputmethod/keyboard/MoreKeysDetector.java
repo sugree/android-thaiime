@@ -16,8 +16,6 @@
 
 package com.android.inputmethod.keyboard;
 
-import java.util.List;
-
 public class MoreKeysDetector extends KeyDetector {
     private final int mSlideAllowanceSquare;
     private final int mSlideAllowanceSquareTop;
@@ -35,30 +33,19 @@ public class MoreKeysDetector extends KeyDetector {
     }
 
     @Override
-    protected int getMaxNearbyKeys() {
-        // No nearby key will be returned.
-        return 1;
-    }
-
-    @Override
-    public int getKeyIndexAndNearbyCodes(int x, int y, final int[] allCodes) {
-        final List<Key> keys = getKeyboard().mKeys;
+    public Key detectHitKey(int x, int y) {
         final int touchX = getTouchX(x);
         final int touchY = getTouchY(y);
 
-        int nearestIndex = NOT_A_KEY;
+        Key nearestKey = null;
         int nearestDist = (y < 0) ? mSlideAllowanceSquareTop : mSlideAllowanceSquare;
-        final int keyCount = keys.size();
-        for (int index = 0; index < keyCount; index++) {
-            final int dist = keys.get(index).squaredDistanceToEdge(touchX, touchY);
+        for (final Key key : getKeyboard().mKeys) {
+            final int dist = key.squaredDistanceToEdge(touchX, touchY);
             if (dist < nearestDist) {
-                nearestIndex = index;
+                nearestKey = key;
                 nearestDist = dist;
             }
         }
-
-        if (allCodes != null && nearestIndex != NOT_A_KEY)
-            allCodes[0] = keys.get(nearestIndex).mCode;
-        return nearestIndex;
+        return nearestKey;
     }
 }

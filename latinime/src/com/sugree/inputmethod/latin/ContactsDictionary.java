@@ -28,6 +28,13 @@ import android.util.Log;
 
 import com.android.inputmethod.keyboard.Keyboard;
 
+// TODO: This class is superseded by {@link ContactsBinaryDictionary}. Should be cleaned up.
+/**
+ * An expandable dictionary that stores the words from Contacts provider.
+ *
+ * @deprecated Use {@link ContactsBinaryDictionary}.
+ */
+@Deprecated
 public class ContactsDictionary extends ExpandableDictionary {
 
     private static final String[] PROJECTION = {
@@ -149,9 +156,10 @@ public class ContactsDictionary extends ExpandableDictionary {
                                 // capitalization of i.
                                 final int wordLen = word.length();
                                 if (wordLen < maxWordLength && wordLen > 1) {
-                                    super.addWord(word, FREQUENCY_FOR_CONTACTS);
+                                    super.addWord(word, null /* shortcut */,
+                                            FREQUENCY_FOR_CONTACTS);
                                     if (!TextUtils.isEmpty(prevWord)) {
-                                        super.setBigram(prevWord, word,
+                                        super.setBigramAndGetFrequency(prevWord, word,
                                                 FREQUENCY_FOR_CONTACTS_BIGRAM);
                                     }
                                     prevWord = word;

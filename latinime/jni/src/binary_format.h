@@ -17,30 +17,45 @@
 #ifndef LATINIME_BINARY_FORMAT_H
 #define LATINIME_BINARY_FORMAT_H
 
+#include <limits>
+#include "bloom_filter.h"
 #include "unigram_dictionary.h"
 
 namespace latinime {
 
 class BinaryFormat {
-private:
+ private:
     const static int32_t MINIMAL_ONE_BYTE_CHARACTER_VALUE = 0x20;
     const static int32_t CHARACTER_ARRAY_TERMINATOR = 0x1F;
     const static int MULTIPLE_BYTE_CHARACTER_ADDITIONAL_SIZE = 2;
 
-public:
+ public:
     const static int UNKNOWN_FORMAT = -1;
-    const static int FORMAT_VERSION_1 = 1;
-    const static uint16_t FORMAT_VERSION_1_MAGIC_NUMBER = 0x78B1;
+    // Originally, format version 1 had a 16-bit magic number, then the version number `01'
+    // then options that must be 0. Hence the first 32-bits of the format are always as follow
+    // and it's okay to consider them a magic number as a whole.
+    const static uint32_t FORMAT_VERSION_1_MAGIC_NUMBER = 0x78B10100;
+    const static unsigned int FORMAT_VERSION_1_HEADER_SIZE = 5;
+    // The versions of Latin IME that only handle format version 1 only test for the magic
+    // number, so we had to change it so that version 2 files would be rejected by older
+    // implementations. On this occasion, we made the magic number 32 bits long.
+    const static uint32_t FORMAT_VERSION_2_MAGIC_NUMBER = 0x9BC13AFE;
+
+    const static int CHARACTER_ARRAY_TERMINATOR_SIZE = 1;
+    const static int SHORTCUT_LIST_SIZE_SIZE = 2;
 
     static int detectFormat(const uint8_t* const dict);
+    static unsigned int getHeaderSize(const uint8_t* const dict);
+    static unsigned int getFlags(const uint8_t* const dict);
     static int getGroupCountAndForwardPointer(const uint8_t* const dict, int* pos);
     static uint8_t getFlagsAndForwardPointer(const uint8_t* const dict, int* pos);
     static int32_t getCharCodeAndForwardPointer(const uint8_t* const dict, int* pos);
     static int readFrequencyWithoutMovingPointer(const uint8_t* const dict, const int pos);
     static int skipOtherCharacters(const uint8_t* const dict, const int pos);
-    static int skipAttributes(const uint8_t* const dict, const int pos);
     static int skipChildrenPosition(const uint8_t flags, const int pos);
     static int skipFrequency(const uint8_t flags, const int pos);
+    static int skipShortcuts(const uint8_t* const dict, const uint8_t flags, const int pos);
+    static int skipBigrams(const uint8_t* const dict, const uint8_t flags, const int pos);
     static int skipAllAttributes(const uint8_t* const dict, const uint8_t flags, const int pos);
     static int skipChildrenPosAndAttributes(const uint8_t* const dict, const uint8_t flags,
             const int pos);
@@ -48,20 +63,71 @@ public:
     static bool hasChildrenInFlags(const uint8_t flags);
     static int getAttributeAddressAndForwardPointer(const uint8_t* const dict, const uint8_t flags,
             int *pos);
-    static int getTerminalPosition(const uint8_t* const root, const uint16_t* const inWord,
+    static int getTerminalPosition(const uint8_t* const root, const int32_t* const inWord,
             const int length);
     static int getWordAtAddress(const uint8_t* const root, const int address, const int maxDepth,
-            uint16_t* outWord);
+            uint16_t* outWord, int* outUnigramFrequency);
+    static int computeFrequencyForBigram(const int unigramFreq, const int bigramFreq);
+    static int getProbability(const int position, const std::map<int, int> *bigramMap,
+            const uint8_t *bigramFilter, const int unigramFreq);
+
+    // Flags for special processing
+    // Those *must* match the flags in makedict (BinaryDictInputOutput#*_PROCESSING_FLAG) or
+    // something very bad (like, the apocalypse) will happen. Please update both at the same time.
+    enum {
+        REQUIRES_GERMAN_UMLAUT_PROCESSING = 0x1,
+        REQUIRES_FRENCH_LIGATURES_PROCESSING = 0x4
+    };
+    const static unsigned int NO_FLAGS = 0;
 };
 
 inline int BinaryFormat::detectFormat(const uint8_t* const dict) {
-    const uint16_t magicNumber = (dict[0] << 8) + dict[1]; // big endian
-    if (FORMAT_VERSION_1_MAGIC_NUMBER == magicNumber) return FORMAT_VERSION_1;
-    return UNKNOWN_FORMAT;
+    // The magic number is stored big-endian.
+    const uint32_t magicNumber = (dict[0] << 24) + (dict[1] << 16) + (dict[2] << 8) + dict[3];
+    switch (magicNumber) {
+    case FORMAT_VERSION_1_MAGIC_NUMBER:
+        // Format 1 header is exactly 5 bytes long and looks like:
+        // Magic number (2 bytes) 0x78 0xB1
+        // Version number (1 byte) 0x01
+        // Options (2 bytes) must be 0x00 0x00
+        return 1;
+    case FORMAT_VERSION_2_MAGIC_NUMBER:
+        // Format 2 header is as follows:
+        // Magic number (4 bytes) 0x9B 0xC1 0x3A 0xFE
+        // Version number (2 bytes) 0x00 0x02
+        // Options (2 bytes)
+        // Header size (4 bytes) : integer, big endian
+        return (dict[4] << 8) + dict[5];
+    default:
+        return UNKNOWN_FORMAT;
+    }
+}
+
+inline unsigned int BinaryFormat::getFlags(const uint8_t* const dict) {
+    switch (detectFormat(dict)) {
+    case 1:
+        return NO_FLAGS;
+    default:
+        return (dict[6] << 8) + dict[7];
+    }
+}
+
+inline unsigned int BinaryFormat::getHeaderSize(const uint8_t* const dict) {
+    switch (detectFormat(dict)) {
+    case 1:
+        return FORMAT_VERSION_1_HEADER_SIZE;
+    case 2:
+        // See the format of the header in the comment in detectFormat() above
+        return (dict[8] << 24) + (dict[9] << 16) + (dict[10] << 8) + dict[11];
+    default:
+        return std::numeric_limits<unsigned int>::max();
+    }
 }
 
 inline int BinaryFormat::getGroupCountAndForwardPointer(const uint8_t* const dict, int* pos) {
-    return dict[(*pos)++];
+    const int msb = dict[(*pos)++];
+    if (msb < 0x80) return msb;
+    return ((msb & 0x7F) << 8) | dict[(*pos)++];
 }
 
 inline uint8_t BinaryFormat::getFlagsAndForwardPointer(const uint8_t* const dict, int* pos) {
@@ -118,12 +184,12 @@ static inline int attributeAddressSize(const uint8_t flags) {
     */
 }
 
-inline int BinaryFormat::skipAttributes(const uint8_t* const dict, const int pos) {
+static inline int skipExistingBigrams(const uint8_t* const dict, const int pos) {
     int currentPos = pos;
-    uint8_t flags = getFlagsAndForwardPointer(dict, &currentPos);
+    uint8_t flags = BinaryFormat::getFlagsAndForwardPointer(dict, &currentPos);
     while (flags & UnigramDictionary::FLAG_ATTRIBUTE_HAS_NEXT) {
         currentPos += attributeAddressSize(flags);
-        flags = getFlagsAndForwardPointer(dict, &currentPos);
+        flags = BinaryFormat::getFlagsAndForwardPointer(dict, &currentPos);
     }
     currentPos += attributeAddressSize(flags);
     return currentPos;
@@ -135,6 +201,10 @@ static inline int childrenAddressSize(const uint8_t flags) {
     /* See the note in attributeAddressSize. The same applies here */
 }
 
+static inline int shortcutByteSize(const uint8_t* const dict, const int pos) {
+    return ((int)(dict[pos] << 8)) + (dict[pos + 1]);
+}
+
 inline int BinaryFormat::skipChildrenPosition(const uint8_t flags, const int pos) {
     return pos + childrenAddressSize(flags);
 }
@@ -143,17 +213,31 @@ inline int BinaryFormat::skipFrequency(const uint8_t flags, const int pos) {
     return UnigramDictionary::FLAG_IS_TERMINAL & flags ? pos + 1 : pos;
 }
 
-inline int BinaryFormat::skipAllAttributes(const uint8_t* const dict, const uint8_t flags,
+inline int BinaryFormat::skipShortcuts(const uint8_t* const dict, const uint8_t flags,
         const int pos) {
-    // This function skips all attributes. The format makes provision for future extension
-    // with other attributes (notably shortcuts) but for the time being, bigrams are the
-    // only attributes that may be found in a character group, so we only look at bigrams
-    // in this version.
-    if (UnigramDictionary::FLAG_HAS_BIGRAMS & flags) {
-        return skipAttributes(dict, pos);
+    if (UnigramDictionary::FLAG_HAS_SHORTCUT_TARGETS & flags) {
+        return pos + shortcutByteSize(dict, pos);
     } else {
         return pos;
     }
+}
+
+inline int BinaryFormat::skipBigrams(const uint8_t* const dict, const uint8_t flags,
+        const int pos) {
+    if (UnigramDictionary::FLAG_HAS_BIGRAMS & flags) {
+        return skipExistingBigrams(dict, pos);
+    } else {
+        return pos;
+    }
+}
+
+inline int BinaryFormat::skipAllAttributes(const uint8_t* const dict, const uint8_t flags,
+        const int pos) {
+    // This function skips all attributes: shortcuts and bigrams.
+    int newPos = pos;
+    newPos = skipShortcuts(dict, flags, newPos);
+    newPos = skipBigrams(dict, flags, newPos);
+    return newPos;
 }
 
 inline int BinaryFormat::skipChildrenPosAndAttributes(const uint8_t* const dict,
@@ -224,7 +308,7 @@ inline int BinaryFormat::getAttributeAddressAndForwardPointer(const uint8_t* con
 // This function gets the byte position of the last chargroup of the exact matching word in the
 // dictionary. If no match is found, it returns NOT_VALID_WORD.
 inline int BinaryFormat::getTerminalPosition(const uint8_t* const root,
-        const uint16_t* const inWord, const int length) {
+        const int32_t* const inWord, const int length) {
     int pos = 0;
     int wordPos = 0;
 
@@ -233,7 +317,7 @@ inline int BinaryFormat::getTerminalPosition(const uint8_t* const root,
         // there was no match (or we would have found it).
         if (wordPos > length) return NOT_VALID_WORD;
         int charGroupCount = BinaryFormat::getGroupCountAndForwardPointer(root, &pos);
-        const uint16_t wChar = inWord[wordPos];
+        const int32_t wChar = inWord[wordPos];
         while (true) {
             // If there are no more character groups in this node, it means we could not
             // find a matching character for this depth, therefore there is no match.
@@ -307,10 +391,11 @@ inline int BinaryFormat::getTerminalPosition(const uint8_t* const root,
  * address: the byte position of the last chargroup of the word we are searching for (this is
  *   what is stored as the "bigram address" in each bigram)
  * outword: an array to write the found word, with MAX_WORD_LENGTH size.
+ * outUnigramFrequency: a pointer to an int to write the frequency into.
  * Return value : the length of the word, of 0 if the word was not found.
  */
 inline int BinaryFormat::getWordAtAddress(const uint8_t* const root, const int address,
-        const int maxDepth, uint16_t* outWord) {
+        const int maxDepth, uint16_t* outWord, int* outUnigramFrequency) {
     int pos = 0;
     int wordPos = 0;
 
@@ -338,11 +423,12 @@ inline int BinaryFormat::getWordAtAddress(const uint8_t* const root, const int a
                     // We count chars in order to avoid infinite loops if the file is broken or
                     // if there is some other bug
                     int charCount = maxDepth;
-                    while (-1 != nextChar && --charCount > 0) {
+                    while (NOT_A_CHARACTER != nextChar && --charCount > 0) {
                         outWord[++wordPos] = nextChar;
                         nextChar = getCharCodeAndForwardPointer(root, &pos);
                     }
                 }
+                *outUnigramFrequency = readFrequencyWithoutMovingPointer(root, pos);
                 return ++wordPos;
             }
             // We need to skip past this char group, so skip any remaining chars after the
@@ -435,6 +521,39 @@ inline int BinaryFormat::getWordAtAddress(const uint8_t* const root, const int a
     // If we have looked through all the chargroups and found no match, the address is
     // not the address of a terminal in this dictionary.
     return 0;
+}
+
+static inline int backoff(const int unigramFreq) {
+    return unigramFreq;
+    // For some reason, applying the backoff weight gives bad results in tests. To apply the
+    // backoff weight, we divide the probability by 2, which in our storing format means
+    // decreasing the score by 8.
+    // TODO: figure out what's wrong with this.
+    // return unigramFreq > 8 ? unigramFreq - 8 : (0 == unigramFreq ? 0 : 8);
+}
+
+inline int BinaryFormat::computeFrequencyForBigram(const int unigramFreq, const int bigramFreq) {
+    // We divide the range [unigramFreq..255] in 16.5 steps - in other words, we want the
+    // unigram frequency to be the median value of the 17th step from the top. A value of
+    // 0 for the bigram frequency represents the middle of the 16th step from the top,
+    // while a value of 15 represents the middle of the top step.
+    // See makedict.BinaryDictInputOutput for details.
+    const float stepSize = ((float)MAX_FREQ - unigramFreq) / (1.5f + MAX_BIGRAM_FREQ);
+    return (int)(unigramFreq + (bigramFreq + 1) * stepSize);
+}
+
+// This returns a probability in log space.
+inline int BinaryFormat::getProbability(const int position, const std::map<int, int> *bigramMap,
+        const uint8_t *bigramFilter, const int unigramFreq) {
+    if (!bigramMap || !bigramFilter) return backoff(unigramFreq);
+    if (!isInFilter(bigramFilter, position)) return backoff(unigramFreq);
+    const std::map<int, int>::const_iterator bigramFreqIt = bigramMap->find(position);
+    if (bigramFreqIt != bigramMap->end()) {
+        const int bigramFreq = bigramFreqIt->second;
+        return computeFrequencyForBigram(unigramFreq, bigramFreq);
+    } else {
+        return backoff(unigramFreq);
+    }
 }
 
 } // namespace latinime

@@ -22,43 +22,44 @@ import android.content.res.Resources;
 import android.util.Log;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Locale;
 
 /**
  * Factory for dictionary instances.
  */
 public class DictionaryFactory {
-
-    private static String TAG = DictionaryFactory.class.getSimpleName();
+    private static final String TAG = DictionaryFactory.class.getSimpleName();
+    // This class must be located in the same package as LatinIME.java.
+    private static final String RESOURCE_PACKAGE_NAME =
+            DictionaryFactory.class.getPackage().getName();
 
     /**
-     * Initializes a dictionary from a dictionary pack, with explicit flags.
+     * Initializes a main dictionary collection from a dictionary pack, with explicit flags.
      *
      * This searches for a content provider providing a dictionary pack for the specified
-     * locale. If none is found, it falls back to using the resource passed as fallBackResId
-     * as a dictionary.
+     * locale. If none is found, it falls back to the built-in dictionary - if any.
      * @param context application context for reading resources
      * @param locale the locale for which to create the dictionary
-     * @param fallbackResId the id of the resource to use as a fallback if no pack is found
-     * @param flagArray an array of flags to use
+     * @param useFullEditDistance whether to use the full edit distance in suggestions
      * @return an initialized instance of DictionaryCollection
      */
-    public static DictionaryCollection createDictionaryFromManager(final Context context,
-            final Locale locale, final int fallbackResId, final Flag[] flagArray) {
+    public static DictionaryCollection createMainDictionaryFromManager(final Context context,
+            final Locale locale, final boolean useFullEditDistance) {
         if (null == locale) {
             Log.e(TAG, "No locale defined for dictionary");
-            return new DictionaryCollection(createBinaryDictionary(context, fallbackResId, locale));
+            return new DictionaryCollection(createBinaryDictionary(context, locale));
         }
 
-        final List<Dictionary> dictList = new LinkedList<Dictionary>();
-        final List<AssetFileAddress> assetFileList =
-                BinaryDictionaryGetter.getDictionaryFiles(locale, context, fallbackResId);
+        final LinkedList<Dictionary> dictList = new LinkedList<Dictionary>();
+        final ArrayList<AssetFileAddress> assetFileList =
+                BinaryDictionaryGetter.getDictionaryFiles(locale, context);
         if (null != assetFileList) {
             for (final AssetFileAddress f : assetFileList) {
                 final BinaryDictionary binaryDictionary =
-                        new BinaryDictionary(context, f.mFilename, f.mOffset, f.mLength, flagArray);
+                        new BinaryDictionary(context, f.mFilename, f.mOffset, f.mLength,
+                                useFullEditDistance, locale);
                 if (binaryDictionary.isValidDictionary()) {
                     dictList.add(binaryDictionary);
                 }
@@ -72,45 +73,37 @@ public class DictionaryFactory {
     }
 
     /**
-     * Initializes a dictionary from a dictionary pack, with default flags.
+     * Initializes a main dictionary collection from a dictionary pack, with default flags.
      *
      * This searches for a content provider providing a dictionary pack for the specified
-     * locale. If none is found, it falls back to using the resource passed as fallBackResId
-     * as a dictionary.
+     * locale. If none is found, it falls back to the built-in dictionary, if any.
      * @param context application context for reading resources
      * @param locale the locale for which to create the dictionary
-     * @param fallbackResId the id of the resource to use as a fallback if no pack is found
      * @return an initialized instance of DictionaryCollection
      */
-    public static DictionaryCollection createDictionaryFromManager(final Context context,
-            final Locale locale, final int fallbackResId) {
-        return createDictionaryFromManager(context, locale, fallbackResId, null);
+    public static DictionaryCollection createMainDictionaryFromManager(final Context context,
+            final Locale locale) {
+        return createMainDictionaryFromManager(context, locale, false /* useFullEditDistance */);
     }
 
     /**
      * Initializes a dictionary from a raw resource file
      * @param context application context for reading resources
-     * @param resId the resource containing the raw binary dictionary
      * @param locale the locale to use for the resource
      * @return an initialized instance of BinaryDictionary
      */
     protected static BinaryDictionary createBinaryDictionary(final Context context,
-            final int resId, final Locale locale) {
+            final Locale locale) {
         AssetFileDescriptor afd = null;
         try {
-            final Resources res = context.getResources();
-            if (null != locale) {
-                final Locale savedLocale = LocaleUtils.setSystemLocale(res, locale);
-                afd = res.openRawResourceFd(resId);
-                LocaleUtils.setSystemLocale(res, savedLocale);
-            } else {
-                afd = res.openRawResourceFd(resId);
-            }
+            final int resId =
+                    getMainDictionaryResourceIdIfAvailableForLocale(context.getResources(), locale);
+            if (0 == resId) return null;
+            afd = context.getResources().openRawResourceFd(resId);
             if (afd == null) {
                 Log.e(TAG, "Found the resource but it is compressed. resId=" + resId);
                 return null;
             }
-            if (!isFullDictionary(afd)) return null;
             final String sourceDir = context.getApplicationInfo().sourceDir;
             final File packagePath = new File(sourceDir);
             // TODO: Come up with a way to handle a directory.
@@ -118,10 +111,10 @@ public class DictionaryFactory {
                 Log.e(TAG, "sourceDir is not a file: " + sourceDir);
                 return null;
             }
-            return new BinaryDictionary(context,
-                    sourceDir, afd.getStartOffset(), afd.getLength(), null);
+            return new BinaryDictionary(context, sourceDir, afd.getStartOffset(), afd.getLength(),
+                    false /* useFullEditDistance */, locale);
         } catch (android.content.res.Resources.NotFoundException e) {
-            Log.e(TAG, "Could not find the resource. resId=" + resId);
+            Log.e(TAG, "Could not find the resource");
             return null;
         } finally {
             if (null != afd) {
@@ -140,14 +133,14 @@ public class DictionaryFactory {
      * @param dictionary the file to read
      * @param startOffset the offset in the file where the data starts
      * @param length the length of the data
-     * @param flagArray the flags to use with this data for testing
+     * @param useFullEditDistance whether to use the full edit distance in suggestions
      * @return the created dictionary, or null.
      */
     public static Dictionary createDictionaryForTest(Context context, File dictionary,
-            long startOffset, long length, Flag[] flagArray) {
+            long startOffset, long length, final boolean useFullEditDistance, Locale locale) {
         if (dictionary.isFile()) {
             return new BinaryDictionary(context, dictionary.getAbsolutePath(), startOffset, length,
-                    flagArray);
+                    useFullEditDistance, locale);
         } else {
             Log.e(TAG, "Could not find the file. path=" + dictionary.getAbsolutePath());
             return null;
@@ -162,51 +155,47 @@ public class DictionaryFactory {
      */
     public static boolean isDictionaryAvailable(Context context, Locale locale) {
         final Resources res = context.getResources();
-        final Locale saveLocale = LocaleUtils.setSystemLocale(res, locale);
-
-        final int resourceId = Utils.getMainDictionaryResourceId(res);
-        final AssetFileDescriptor afd = res.openRawResourceFd(resourceId);
-        final boolean hasDictionary = isFullDictionary(afd);
-        try {
-            if (null != afd) afd.close();
-        } catch (java.io.IOException e) {
-            /* Um, what can we do here exactly? */
-        }
-
-        LocaleUtils.setSystemLocale(res, saveLocale);
-        return hasDictionary;
+        return 0 != getMainDictionaryResourceIdIfAvailableForLocale(res, locale);
     }
 
-    // TODO: Do not use the size of the dictionary as an unique dictionary ID.
-    public static Long getDictionaryId(final Context context, final Locale locale) {
-        final Resources res = context.getResources();
-        final Locale saveLocale = LocaleUtils.setSystemLocale(res, locale);
+    private static final String DEFAULT_MAIN_DICT = "main";
+    private static final String MAIN_DICT_PREFIX = "main_";
 
-        final int resourceId = Utils.getMainDictionaryResourceId(res);
-        final AssetFileDescriptor afd = res.openRawResourceFd(resourceId);
-        final Long size = (afd != null && afd.getLength() > PLACEHOLDER_LENGTH)
-                ? afd.getLength()
-                : null;
-        try {
-            if (null != afd) afd.close();
-        } catch (java.io.IOException e) {
-        }
-
-        LocaleUtils.setSystemLocale(res, saveLocale);
-        return size;
-    }
-
-    // TODO: Find the Right Way to find out whether the resource is a placeholder or not.
-    // Suggestion : strip the locale, open the placeholder file and store its offset.
-    // Upon opening the file, if it's the same offset, then it's the placeholder.
-    private static final long PLACEHOLDER_LENGTH = 34;
     /**
-     * Finds out whether the data pointed out by an AssetFileDescriptor is a full
-     * dictionary (as opposed to null, or to a place holder).
-     * @param afd the file descriptor to test, or null
-     * @return true if the dictionary is a real full dictionary, false if it's null or a placeholder
+     * Helper method to return a dictionary res id for a locale, or 0 if none.
+     * @param locale dictionary locale
+     * @return main dictionary resource id
      */
-    protected static boolean isFullDictionary(final AssetFileDescriptor afd) {
-        return (afd != null && afd.getLength() > PLACEHOLDER_LENGTH);
+    private static int getMainDictionaryResourceIdIfAvailableForLocale(final Resources res,
+            final Locale locale) {
+        int resId;
+        // Try to find main_language_country dictionary.
+        if (!locale.getCountry().isEmpty()) {
+            final String dictLanguageCountry = MAIN_DICT_PREFIX + locale.toString().toLowerCase();
+            if ((resId = res.getIdentifier(
+                    dictLanguageCountry, "raw", RESOURCE_PACKAGE_NAME)) != 0) {
+                return resId;
+            }
+        }
+
+        // Try to find main_language dictionary.
+        final String dictLanguage = MAIN_DICT_PREFIX + locale.getLanguage();
+        if ((resId = res.getIdentifier(dictLanguage, "raw", RESOURCE_PACKAGE_NAME)) != 0) {
+            return resId;
+        }
+
+        // Not found, return 0
+        return 0;
+    }
+
+    /**
+     * Returns a main dictionary resource id
+     * @param locale dictionary locale
+     * @return main dictionary resource id
+     */
+    public static int getMainDictionaryResourceId(final Resources res, final Locale locale) {
+        int resourceId = getMainDictionaryResourceIdIfAvailableForLocale(res, locale);
+        if (0 != resourceId) return resourceId;
+        return res.getIdentifier(DEFAULT_MAIN_DICT, "raw", RESOURCE_PACKAGE_NAME);
     }
 }

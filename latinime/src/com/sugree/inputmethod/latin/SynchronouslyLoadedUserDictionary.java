@@ -21,6 +21,7 @@ import android.content.Context;
 import com.android.inputmethod.keyboard.ProximityInfo;
 
 public class SynchronouslyLoadedUserDictionary extends UserDictionary {
+    private boolean mClosed;
 
     public SynchronouslyLoadedUserDictionary(final Context context, final String locale) {
         this(context, locale, false);
@@ -32,15 +33,24 @@ public class SynchronouslyLoadedUserDictionary extends UserDictionary {
     }
 
     @Override
-    public synchronized void getWords(final WordComposer codes, final WordCallback callback,
+    public synchronized void getWords(final WordComposer codes,
+            final CharSequence prevWordForBigrams, final WordCallback callback,
             final ProximityInfo proximityInfo) {
         blockingReloadDictionaryIfRequired();
-        getWordsInner(codes, callback, proximityInfo);
+        getWordsInner(codes, prevWordForBigrams, callback, proximityInfo);
     }
 
     @Override
     public synchronized boolean isValidWord(CharSequence word) {
         blockingReloadDictionaryIfRequired();
-        return getWordFrequency(word) > -1;
+        return super.isValidWord(word);
+    }
+
+    // Protect against multiple closing
+    @Override
+    public synchronized void close() {
+        if (mClosed) return;
+        mClosed = true;
+        super.close();
     }
 }

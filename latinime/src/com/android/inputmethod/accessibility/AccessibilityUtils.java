@@ -17,7 +17,6 @@
 package com.android.inputmethod.accessibility;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.inputmethodservice.InputMethodService;
 import android.media.AudioManager;
 import android.os.SystemClock;
@@ -28,11 +27,9 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.inputmethod.EditorInfo;
 
-import com.android.inputmethod.compat.AccessibilityManagerCompatWrapper;
 import com.android.inputmethod.compat.AudioManagerCompatWrapper;
-import com.android.inputmethod.compat.InputTypeCompatUtils;
-import com.android.inputmethod.compat.MotionEventCompatUtils;
 import com.android.inputmethod.compat.SettingsSecureCompatUtils;
+import com.sugree.inputmethod.latin.InputTypeUtils;
 import com.sugree.inputmethod.latin.R;
 
 public class AccessibilityUtils {
@@ -45,7 +42,6 @@ public class AccessibilityUtils {
 
     private Context mContext;
     private AccessibilityManager mAccessibilityManager;
-    private AccessibilityManagerCompatWrapper mCompatManager;
     private AudioManagerCompatWrapper mAudioManager;
 
     /*
@@ -55,15 +51,14 @@ public class AccessibilityUtils {
      */
     private static final boolean ENABLE_ACCESSIBILITY = true;
 
-    public static void init(InputMethodService inputMethod, SharedPreferences prefs) {
+    public static void init(InputMethodService inputMethod) {
         if (!ENABLE_ACCESSIBILITY)
             return;
 
         // These only need to be initialized if the kill switch is off.
-        sInstance.initInternal(inputMethod, prefs);
-        KeyCodeDescriptionMapper.init(inputMethod, prefs);
-        AccessibleInputMethodServiceProxy.init(inputMethod, prefs);
-        AccessibleKeyboardViewProxy.init(inputMethod, prefs);
+        sInstance.initInternal(inputMethod);
+        KeyCodeDescriptionMapper.init();
+        AccessibleKeyboardViewProxy.init(inputMethod);
     }
 
     public static AccessibilityUtils getInstance() {
@@ -74,11 +69,10 @@ public class AccessibilityUtils {
         // This class is not publicly instantiable.
     }
 
-    private void initInternal(Context context, SharedPreferences prefs) {
+    private void initInternal(Context context) {
         mContext = context;
         mAccessibilityManager = (AccessibilityManager) context
                 .getSystemService(Context.ACCESSIBILITY_SERVICE);
-        mCompatManager = new AccessibilityManagerCompatWrapper(mAccessibilityManager);
 
         final AudioManager audioManager = (AudioManager) context
                 .getSystemService(Context.AUDIO_SERVICE);
@@ -95,7 +89,7 @@ public class AccessibilityUtils {
     public boolean isTouchExplorationEnabled() {
         return ENABLE_ACCESSIBILITY
                 && mAccessibilityManager.isEnabled()
-                && mCompatManager.isTouchExplorationEnabled();
+                && mAccessibilityManager.isTouchExplorationEnabled();
     }
 
     /**
@@ -109,19 +103,19 @@ public class AccessibilityUtils {
     public boolean isTouchExplorationEvent(MotionEvent event) {
         final int action = event.getAction();
 
-        return action == MotionEventCompatUtils.ACTION_HOVER_ENTER
-                || action == MotionEventCompatUtils.ACTION_HOVER_EXIT
-                || action == MotionEventCompatUtils.ACTION_HOVER_MOVE;
+        return action == MotionEvent.ACTION_HOVER_ENTER
+                || action == MotionEvent.ACTION_HOVER_EXIT
+                || action == MotionEvent.ACTION_HOVER_MOVE;
     }
 
     /**
      * Returns whether the device should obscure typed password characters.
      * Typically this means speaking "dot" in place of non-control characters.
-     * 
+     *
      * @return {@code true} if the device should obscure password characters.
      */
-    public boolean shouldObscureInput(EditorInfo attribute) {
-        if (attribute == null)
+    public boolean shouldObscureInput(EditorInfo editorInfo) {
+        if (editorInfo == null)
             return false;
 
         // The user can optionally force speaking passwords.
@@ -137,7 +131,7 @@ public class AccessibilityUtils {
             return false;
 
         // Don't speak if the IME is connected to a password field.
-        return InputTypeCompatUtils.isPasswordInputType(attribute.inputType);
+        return InputTypeUtils.isPasswordInputType(editorInfo.inputType);
     }
 
     /**
@@ -171,13 +165,25 @@ public class AccessibilityUtils {
      * Handles speaking the "connect a headset to hear passwords" notification
      * when connecting to a password field.
      *
-     * @param attribute The input connection's editor info attribute.
+     * @param editorInfo The input connection's editor info attribute.
      * @param restarting Whether the connection is being restarted.
      */
-    public void onStartInputViewInternal(EditorInfo attribute, boolean restarting) {
-        if (shouldObscureInput(attribute)) {
+    public void onStartInputViewInternal(EditorInfo editorInfo, boolean restarting) {
+        if (shouldObscureInput(editorInfo)) {
             final CharSequence text = mContext.getText(R.string.spoken_use_headphones);
             speak(text);
+        }
+    }
+
+    /**
+     * Sends the specified {@link AccessibilityEvent} if accessibility is
+     * enabled. No operation if accessibility is disabled.
+     *
+     * @param event The event to send.
+     */
+    public void requestSendAccessibilityEvent(AccessibilityEvent event) {
+        if (mAccessibilityManager.isEnabled()) {
+            mAccessibilityManager.sendAccessibilityEvent(event);
         }
     }
 }

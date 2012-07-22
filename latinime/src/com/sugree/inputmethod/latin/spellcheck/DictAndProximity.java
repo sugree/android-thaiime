@@ -16,8 +16,8 @@
 
 package com.sugree.inputmethod.latin.spellcheck;
 
-import com.android.inputmethod.keyboard.ProximityInfo;
 import com.sugree.inputmethod.latin.Dictionary;
+import com.android.inputmethod.keyboard.ProximityInfo;
 
 /**
  * A simple container for both a Dictionary and a ProximityInfo.

@@ -5,16 +5,15 @@
     <uses-permission android:name="android.permission.VIBRATE"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.READ_USER_DICTIONARY" />
-    <uses-permission android:name="android.permission.WRITE_USER_DICTIONARY" />
     <uses-permission android:name="android.permission.READ_CONTACTS" />
 
-    <application android:label="@string/english_ime_name"
+    <application android:label="@string/aosp_android_keyboard_ime_name"
             android:icon="@drawable/ic_ime_settings"
             android:backupAgent="BackupAgent"
             android:killAfterRestore="false">
 
         <service android:name="LatinIME"
-                android:label="@string/english_ime_name"
+                android:label="@string/aosp_android_keyboard_ime_name"
                 android:permission="android.permission.BIND_INPUT_METHOD">
             <intent-filter>
                 <action android:name="android.view.InputMethod" />
@@ -31,7 +30,8 @@
             <meta-data android:name="android.view.textservice.scs" android:resource="@xml/spellchecker" />
         </service>
 
-        <activity android:name="Settings" android:label="@string/english_ime_settings">
+        <activity android:name="SettingsActivity" android:label="@string/english_ime_settings"
+                  android:uiOptions="splitActionBarWhenNarrow">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
             </intent-filter>
@@ -44,18 +44,9 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="DebugSettings" android:label="@string/english_ime_debug_settings">
+        <activity android:name="DebugSettingsActivity" android:label="@string/english_ime_debug_settings">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
-            </intent-filter>
-        </activity>
-
-        <activity android:name="com.android.inputmethod.deprecated.languageswitcher.InputLanguageSelection"
-                android:label="@string/language_selection_title">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <action android:name="com.sugree.inputmethod.latin.INPUT_LANGUAGE_SELECTION"/>
-                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
 

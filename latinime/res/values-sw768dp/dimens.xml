@@ -19,9 +19,10 @@
 -->
 
 <resources>
-    <!-- keyboardHeight = key_height*4 + key_bottom_gap*3, key_height=12mm -->
-    <dimen name="keyboardHeight">48.0mm</dimen>
-    <fraction name="maxKeyboardHeight">50%p</fraction>
+    <!-- Preferable keyboard height in absolute scale: 48.0mm -->
+    <!-- This keyboardHeight value should match with keyboard-heights.xml -->
+    <dimen name="keyboardHeight">302.4dp</dimen>
+    <fraction name="maxKeyboardHeight">46%p</fraction>
     <fraction name="minKeyboardHeight">-35.0%p</fraction>
 
     <fraction name="keyboard_top_padding">2.291%p</fraction>
@@ -30,7 +31,6 @@
     <fraction name="key_bottom_gap">4.270%p</fraction>
     <fraction name="key_horizontal_gap">1.551%p</fraction>
 
-    <dimen name="keyboardHeight_stone">48.0mm</dimen>
     <fraction name="key_bottom_gap_stone">3.75%p</fraction>
     <fraction name="key_horizontal_gap_stone">1.059%p</fraction>
 
@@ -41,42 +41,43 @@
     <fraction name="key_bottom_gap_ics">3.312%p</fraction>
     <fraction name="key_horizontal_gap_ics">1.066%p</fraction>
 
-    <dimen name="popup_key_height">10.0mm</dimen>
+    <dimen name="popup_key_height">63.0dp</dimen>
 
-    <dimen name="mini_keyboard_key_horizontal_padding">12dip</dimen>
+    <dimen name="more_keys_keyboard_key_horizontal_padding">12dp</dimen>
     <!-- Amount of allowance for selecting keys in a mini popup keyboard by sliding finger. -->
     <!-- popup_key_height x 1.2 -->
-    <dimen name="mini_keyboard_slide_allowance">15.6mm</dimen>
+    <dimen name="more_keys_keyboard_slide_allowance">98.3dp</dimen>
     <!-- popup_key_height x -1.0 -->
-    <dimen name="mini_keyboard_vertical_correction">-13.0mm</dimen>
+    <dimen name="more_keys_keyboard_vertical_correction">-81.9dp</dimen>
 
     <!-- left or right padding of label alignment -->
-    <dimen name="key_label_horizontal_padding">6dip</dimen>
+    <dimen name="key_label_horizontal_padding">6dp</dimen>
     <dimen name="key_hint_letter_padding">3dp</dimen>
     <dimen name="key_uppercase_letter_padding">3dp</dimen>
 
     <fraction name="key_letter_ratio">40%</fraction>
     <fraction name="key_large_letter_ratio">42%</fraction>
     <fraction name="key_label_ratio">28%</fraction>
+    <fraction name="key_large_label_ratio">28%</fraction>
     <fraction name="key_hint_letter_ratio">23%</fraction>
     <fraction name="key_hint_label_ratio">28%</fraction>
     <fraction name="key_uppercase_letter_ratio">26%</fraction>
     <fraction name="key_preview_text_ratio">50%</fraction>
-    <dimen name="key_preview_height">15.0mm</dimen>
-    <dimen name="key_preview_offset">0.1in</dimen>
+    <fraction name="spacebar_text_ratio">29.03%</fraction>
+    <dimen name="key_preview_height">94.5dp</dimen>
+    <dimen name="key_preview_offset">16.0dp</dimen>
 
-    <dimen name="key_preview_height_ics">15.0mm</dimen>
-    <dimen name="key_preview_offset_ics">0.05in</dimen>
+    <dimen name="key_preview_offset_ics">8.0dp</dimen>
+    <!-- popup_key_height x -0.5 -->
+    <dimen name="more_keys_keyboard_vertical_correction_ics">-31.5dp</dimen>
 
-    <dimen name="suggestions_strip_height">44dip</dimen>
-    <dimen name="more_suggestions_row_height">44dip</dimen>
+    <dimen name="suggestions_strip_height">44dp</dimen>
+    <dimen name="more_suggestions_row_height">44dp</dimen>
     <integer name="max_more_suggestions_row">6</integer>
     <fraction name="min_more_suggestions_width">90%</fraction>
-    <!-- key_preview_backing_height = more_suggestions_row_height * max_more_suggestions_row -->
-    <dimen name="key_preview_backing_height">264dip</dimen>
-    <dimen name="suggestions_strip_padding">15.0mm</dimen>
-    <dimen name="suggestion_min_width">46dip</dimen>
-    <dimen name="suggestion_padding">8dip</dimen>
-    <dimen name="suggestion_text_size">22dip</dimen>
-    <dimen name="more_suggestions_hint_text_size">33dip</dimen>
+    <dimen name="suggestions_strip_padding">94.5dp</dimen>
+    <dimen name="suggestion_min_width">46dp</dimen>
+    <dimen name="suggestion_padding">8dp</dimen>
+    <dimen name="suggestion_text_size">22dp</dimen>
+    <dimen name="more_suggestions_hint_text_size">33dp</dimen>
 </resources>

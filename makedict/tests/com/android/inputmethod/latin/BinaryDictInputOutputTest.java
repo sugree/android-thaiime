@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-package com.android.inputmethod.latin;
+package com.android.inputmethod.latin.makedict;
 
-import com.android.inputmethod.latin.FusionDictionary.Node;
+import com.android.inputmethod.latin.makedict.FusionDictionary.DictionaryOptions;
+import com.android.inputmethod.latin.makedict.FusionDictionary.Node;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import junit.framework.TestCase;
 
@@ -38,7 +40,9 @@ public class BinaryDictInputOutputTest extends TestCase {
     // Test the flattened array contains the expected number of nodes, and
     // that it does not contain any duplicates.
     public void testFlattenNodes() {
-        final FusionDictionary dict = new FusionDictionary();
+        final FusionDictionary dict = new FusionDictionary(new Node(),
+                new DictionaryOptions(new HashMap<String, String>(),
+                        false /* germanUmlautProcessing */, false /* frenchLigatureProcessing */));
         dict.add("foo", 1, null);
         dict.add("fta", 1, null);
         dict.add("ftb", 1, null);

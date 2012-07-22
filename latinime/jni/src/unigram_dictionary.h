@@ -17,22 +17,22 @@
 #ifndef LATINIME_UNIGRAM_DICTIONARY_H
 #define LATINIME_UNIGRAM_DICTIONARY_H
 
+#include <map>
 #include <stdint.h>
 #include "correction.h"
 #include "correction_state.h"
 #include "defines.h"
 #include "proximity_info.h"
-
-#ifndef NULL
-#define NULL 0
-#endif
+#include "words_priority_queue.h"
+#include "words_priority_queue_pool.h"
 
 namespace latinime {
 
+class TerminalAttributes;
 class UnigramDictionary {
+    typedef struct { int first; int second; int replacement; } digraph_t;
 
-public:
-
+ public:
     // Mask and flags for children address type selection.
     static const int MASK_GROUP_ADDRESS_TYPE = 0xC0;
     static const int FLAG_GROUP_ADDRESS_TYPE_NOADDRESS = 0x00;
@@ -46,6 +46,8 @@ public:
     // Flag for terminal groups
     static const int FLAG_IS_TERMINAL = 0x10;
 
+    // Flag for shortcut targets presence
+    static const int FLAG_HAS_SHORTCUT_TARGETS = 0x08;
     // Flag for bigram presence
     static const int FLAG_HAS_BIGRAMS = 0x04;
 
@@ -64,77 +66,101 @@ public:
     static const int FLAG_ATTRIBUTE_ADDRESS_TYPE_TWOBYTES = 0x20;
     static const int FLAG_ATTRIBUTE_ADDRESS_TYPE_THREEBYTES = 0x30;
 
+    // Error tolerances
+    static const int DEFAULT_MAX_ERRORS = 2;
+    static const int MAX_ERRORS_FOR_TWO_WORDS = 1;
+
+    static const int FLAG_MULTIPLE_SUGGEST_ABORT = 0;
+    static const int FLAG_MULTIPLE_SUGGEST_SKIP = 1;
+    static const int FLAG_MULTIPLE_SUGGEST_CONTINUE = 2;
     UnigramDictionary(const uint8_t* const streamStart, int typedLetterMultipler,
-            int fullWordMultiplier, int maxWordLength, int maxWords, int maxProximityChars,
-            const bool isLatestDictVersion);
-    bool isValidWord(const uint16_t* const inWord, const int length) const;
+            int fullWordMultiplier, int maxWordLength, int maxWords, const unsigned int flags);
+    int getFrequency(const int32_t* const inWord, const int length) const;
     int getBigramPosition(int pos, unsigned short *word, int offset, int length) const;
-    int getSuggestions(ProximityInfo *proximityInfo, const int *xcoordinates,
-            const int *ycoordinates, const int *codes, const int codesSize, const int flags,
-            unsigned short *outWords, int *frequencies);
+    int getSuggestions(ProximityInfo *proximityInfo, WordsPriorityQueuePool *queuePool,
+            Correction *correction, const int *xcoordinates, const int *ycoordinates,
+            const int *codes, const int codesSize, const std::map<int, int> *bigramMap,
+            const uint8_t *bigramFilter, const bool useFullEditDistance, unsigned short *outWords,
+            int *frequencies);
     virtual ~UnigramDictionary();
 
-private:
-
+ private:
     void getWordSuggestions(ProximityInfo *proximityInfo, const int *xcoordinates,
-            const int *ycoordinates, const int *codes, const int codesSize,
-            unsigned short *outWords, int *frequencies, const int flags);
-    bool isDigraph(const int* codes, const int i, const int codesSize) const;
+            const int *ycoordinates, const int *codes, const int inputLength,
+            const std::map<int, int> *bigramMap, const uint8_t *bigramFilter,
+            const bool useFullEditDistance, Correction *correction,
+            WordsPriorityQueuePool *queuePool);
+    int getDigraphReplacement(const int *codes, const int i, const int codesSize,
+            const digraph_t* const digraphs, const unsigned int digraphsSize) const;
     void getWordWithDigraphSuggestionsRec(ProximityInfo *proximityInfo,
         const int *xcoordinates, const int* ycoordinates, const int *codesBuffer,
-        const int codesBufferSize, const int flags, const int* codesSrc, const int codesRemain,
-        const int currentDepth, int* codesDest, unsigned short* outWords, int* frequencies);
+        int *xCoordinatesBuffer, int *yCoordinatesBuffer, const int codesBufferSize,
+        const std::map<int, int> *bigramMap, const uint8_t *bigramFilter,
+        const bool useFullEditDistance, const int* codesSrc, const int codesRemain,
+        const int currentDepth, int* codesDest, Correction *correction,
+        WordsPriorityQueuePool* queuePool, const digraph_t* const digraphs,
+        const unsigned int digraphsSize);
     void initSuggestions(ProximityInfo *proximityInfo, const int *xcoordinates,
-            const int *ycoordinates, const int *codes, const int codesSize,
-            unsigned short *outWords, int *frequencies);
-    void getSuggestionCandidates(const bool useFullEditDistance);
-    bool addWord(unsigned short *word, int length, int frequency);
-    void getSplitTwoWordsSuggestion(const int inputLength, Correction *correction);
-    void getMissingSpaceWords(const int inputLength, const int missingSpacePos,
-            Correction *correction, const bool useFullEditDistance);
-    void getMistypedSpaceWords(const int inputLength, const int spaceProximityPos,
-            Correction *correction, const bool useFullEditDistance);
-    void onTerminal(const int freq, Correction *correction);
+            const int *ycoordinates, const int *codes, const int codesSize, Correction *correction);
+    void getOneWordSuggestions(ProximityInfo *proximityInfo, const int *xcoordinates,
+            const int *ycoordinates, const int *codes, const std::map<int, int> *bigramMap,
+            const uint8_t *bigramFilter, const bool useFullEditDistance, const int inputLength,
+            Correction *correction, WordsPriorityQueuePool* queuePool);
+    void getSuggestionCandidates(
+            const bool useFullEditDistance, const int inputLength,
+            const std::map<int, int> *bigramMap, const uint8_t *bigramFilter,
+            Correction *correction, WordsPriorityQueuePool* queuePool, const bool doAutoCompletion,
+            const int maxErrors, const int currentWordIndex);
+    void getSplitMultipleWordsSuggestions(ProximityInfo *proximityInfo,
+            const int *xcoordinates, const int *ycoordinates, const int *codes,
+            const bool useFullEditDistance, const int inputLength,
+            Correction *correction, WordsPriorityQueuePool* queuePool,
+            const bool hasAutoCorrectionCandidate);
+    void onTerminal(const int freq, const TerminalAttributes& terminalAttributes,
+            Correction *correction, WordsPriorityQueuePool *queuePool, const bool addToMasterQueue,
+            const int currentWordIndex);
     bool needsToSkipCurrentNode(const unsigned short c,
             const int inputIndex, const int skipPos, const int depth);
     // Process a node by considering proximity, missing and excessive character
-    bool processCurrentNode(const int initialPos,
-            Correction *correction, int *newCount,
-            int *newChildPosition, int *nextSiblingPosition);
+    bool processCurrentNode(const int initialPos, const std::map<int, int> *bigramMap,
+            const uint8_t *bigramFilter, Correction *correction, int *newCount,
+            int *newChildPosition, int *nextSiblingPosition, WordsPriorityQueuePool *queuePool,
+            const int currentWordIndex);
     int getMostFrequentWordLike(const int startInputIndex, const int inputLength,
-            unsigned short *word);
+            ProximityInfo *proximityInfo, unsigned short *word);
     int getMostFrequentWordLikeInner(const uint16_t* const inWord, const int length,
-            short unsigned int* outWord);
+            short unsigned int *outWord);
+    int getSubStringSuggestion(
+            ProximityInfo *proximityInfo, const int *xcoordinates, const int *ycoordinates,
+            const int *codes, const bool useFullEditDistance, Correction *correction,
+            WordsPriorityQueuePool* queuePool, const int inputLength,
+            const bool hasAutoCorrectionCandidate, const int currentWordIndex,
+            const int inputWordStartPos, const int inputWordLength,
+            const int outputWordStartPos, const bool isSpaceProximity, int *freqArray,
+            int *wordLengthArray, unsigned short* outputWord, int *outputWordLength);
+    void getMultiWordsSuggestionRec(ProximityInfo *proximityInfo,
+            const int *xcoordinates, const int *ycoordinates, const int *codes,
+            const bool useFullEditDistance, const int inputLength,
+            Correction *correction, WordsPriorityQueuePool* queuePool,
+            const bool hasAutoCorrectionCandidate, const int startPos, const int startWordIndex,
+            const int outputWordLength, int *freqArray, int* wordLengthArray,
+            unsigned short* outputWord);
 
     const uint8_t* const DICT_ROOT;
     const int MAX_WORD_LENGTH;
     const int MAX_WORDS;
-    const int MAX_PROXIMITY_CHARS;
-    const bool IS_LATEST_DICT_VERSION;
     const int TYPED_LETTER_MULTIPLIER;
     const int FULL_WORD_MULTIPLIER;
     const int ROOT_POS;
     const unsigned int BYTES_IN_ONE_CHAR;
-    const int MAX_UMLAUT_SEARCH_DEPTH;
+    const int MAX_DIGRAPH_SEARCH_DEPTH;
+    const int FLAGS;
 
-    // Flags for special processing
-    // Those *must* match the flags in BinaryDictionary.Flags.ALL_FLAGS in BinaryDictionary.java
-    // or something very bad (like, the apocalypse) will happen.
-    // Please update both at the same time.
-    enum {
-        REQUIRES_GERMAN_UMLAUT_PROCESSING = 0x1,
-        USE_FULL_EDIT_DISTANCE = 0x2
-    };
-    static const struct digraph_t { int first; int second; } GERMAN_UMLAUT_DIGRAPHS[];
+    static const digraph_t GERMAN_UMLAUT_DIGRAPHS[];
+    static const digraph_t FRENCH_LIGATURES_DIGRAPHS[];
 
-    int *mFrequencies;
-    unsigned short *mOutputChars;
-    ProximityInfo *mProximityInfo;
-    Correction *mCorrection;
-    int mInputLength;
-    // MAX_WORD_LENGTH_INTERNAL must be bigger than MAX_WORD_LENGTH
-    unsigned short mWord[MAX_WORD_LENGTH_INTERNAL];
-
+    // Still bundled members
+    unsigned short mWord[MAX_WORD_LENGTH_INTERNAL];// TODO: remove
     int mStackChildCount[MAX_WORD_LENGTH_INTERNAL];// TODO: remove
     int mStackInputIndex[MAX_WORD_LENGTH_INTERNAL];// TODO: remove
     int mStackSiblingPos[MAX_WORD_LENGTH_INTERNAL];// TODO: remove

@@ -17,18 +17,25 @@
 #ifndef LATINIME_BIGRAM_DICTIONARY_H
 #define LATINIME_BIGRAM_DICTIONARY_H
 
+#include <map>
+#include <stdint.h>
+
+#include "defines.h"
+
 namespace latinime {
 
 class Dictionary;
 class BigramDictionary {
-public:
-    BigramDictionary(const unsigned char *dict, int maxWordLength, int maxAlternatives,
-            const bool isLatestDictVersion, const bool hasBigram, Dictionary *parentDictionary);
-    int getBigrams(unsigned short *word, int length, int *codes, int codesSize,
-            unsigned short *outWords, int *frequencies, int maxWordLength, int maxBigrams,
-            int maxAlternatives);
+ public:
+    BigramDictionary(const unsigned char *dict, int maxWordLength, Dictionary *parentDictionary);
+    int getBigrams(const int32_t *word, int length, int *codes, int codesSize,
+            unsigned short *outWords, int *frequencies, int maxWordLength, int maxBigrams);
+    int getBigramListPositionForWord(const int32_t *prevWord, const int prevWordLength);
+    void fillBigramAddressToFrequencyMapAndFilter(const int32_t *prevWord, const int prevWordLength,
+            std::map<int, int> *map, uint8_t *filter);
+    bool isValidBigram(const int32_t *word1, int length1, const int32_t *word2, int length2);
     ~BigramDictionary();
-private:
+ private:
     bool addWordBigram(unsigned short *word, int length, int frequency);
     int getBigramAddress(int *pos, bool advance);
     int getBigramFreq(int *pos);
@@ -39,9 +46,8 @@ private:
 
     const unsigned char *DICT;
     const int MAX_WORD_LENGTH;
-    const int MAX_ALTERNATIVES;
-    const bool IS_LATEST_DICT_VERSION;
-    const bool HAS_BIGRAM;
+    // TODO: Re-implement proximity correction for bigram correction
+    static const int MAX_ALTERNATIVES = 1;
 
     Dictionary *mParentDictionary;
     int *mBigramFreq;

@@ -19,6 +19,8 @@
 
 #define LOG_TAG "LatinIME: dictionary.cpp"
 
+#include "binary_format.h"
+#include "defines.h"
 #include "dictionary.h"
 
 namespace latinime {
@@ -26,35 +28,40 @@ namespace latinime {
 // TODO: Change the type of all keyCodes to uint32_t
 Dictionary::Dictionary(void *dict, int dictSize, int mmapFd, int dictBufAdjust,
         int typedLetterMultiplier, int fullWordMultiplier,
-        int maxWordLength, int maxWords, int maxAlternatives)
+        int maxWordLength, int maxWords)
     : mDict((unsigned char*) dict), mDictSize(dictSize),
-    mMmapFd(mmapFd), mDictBufAdjust(dictBufAdjust),
-    // Checks whether it has the latest dictionary or the old dictionary
-    IS_LATEST_DICT_VERSION((((unsigned char*) dict)[0] & 0xFF) >= DICTIONARY_VERSION_MIN) {
+      mMmapFd(mmapFd), mDictBufAdjust(dictBufAdjust) {
     if (DEBUG_DICT) {
         if (MAX_WORD_LENGTH_INTERNAL < maxWordLength) {
-            LOGI("Max word length (%d) is greater than %d",
+            AKLOGI("Max word length (%d) is greater than %d",
                     maxWordLength, MAX_WORD_LENGTH_INTERNAL);
-            LOGI("IN NATIVE SUGGEST Version: %d", (mDict[0] & 0xFF));
+            AKLOGI("IN NATIVE SUGGEST Version: %d", (mDict[0] & 0xFF));
         }
     }
-    mUnigramDictionary = new UnigramDictionary(mDict, typedLetterMultiplier, fullWordMultiplier,
-            maxWordLength, maxWords, maxAlternatives, IS_LATEST_DICT_VERSION);
-    mBigramDictionary = new BigramDictionary(mDict, maxWordLength, maxAlternatives,
-            IS_LATEST_DICT_VERSION, hasBigram(), this);
+    mCorrection = new Correction(typedLetterMultiplier, fullWordMultiplier);
+    mWordsPriorityQueuePool = new WordsPriorityQueuePool(
+            maxWords, SUB_QUEUE_MAX_WORDS, maxWordLength);
+    const unsigned int headerSize = BinaryFormat::getHeaderSize(mDict);
+    const unsigned int options = BinaryFormat::getFlags(mDict);
+    mUnigramDictionary = new UnigramDictionary(mDict + headerSize, typedLetterMultiplier,
+            fullWordMultiplier, maxWordLength, maxWords, options);
+    mBigramDictionary = new BigramDictionary(mDict + headerSize, maxWordLength, this);
 }
 
 Dictionary::~Dictionary() {
+    delete mCorrection;
+    delete mWordsPriorityQueuePool;
     delete mUnigramDictionary;
     delete mBigramDictionary;
 }
 
-bool Dictionary::hasBigram() {
-    return ((mDict[1] & 0xFF) == 1);
+int Dictionary::getFrequency(const int32_t *word, int length) {
+    return mUnigramDictionary->getFrequency(word, length);
 }
 
-bool Dictionary::isValidWord(unsigned short *word, int length) {
-    return mUnigramDictionary->isValidWord(word, length);
+bool Dictionary::isValidBigram(const int32_t *word1, int length1, const int32_t *word2,
+        int length2) {
+    return mBigramDictionary->isValidBigram(word1, length1, word2, length2);
 }
 
 } // namespace latinime

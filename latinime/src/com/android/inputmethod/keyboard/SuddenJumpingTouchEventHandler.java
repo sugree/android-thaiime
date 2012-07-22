@@ -17,12 +17,14 @@
 package com.android.inputmethod.keyboard;
 
 import android.content.Context;
-import android.os.Build;
 import android.util.Log;
 import android.view.MotionEvent;
 
-import com.sugree.inputmethod.latin.R;
 import com.sugree.inputmethod.latin.LatinImeLogger;
+import com.sugree.inputmethod.latin.R;
+import com.sugree.inputmethod.latin.ResearchLogger;
+import com.sugree.inputmethod.latin.Utils;
+import com.sugree.inputmethod.latin.define.ProductionFlag;
 
 public class SuddenJumpingTouchEventHandler {
     private static final String TAG = SuddenJumpingTouchEventHandler.class.getSimpleName();
@@ -49,18 +51,8 @@ public class SuddenJumpingTouchEventHandler {
 
     public SuddenJumpingTouchEventHandler(Context context, ProcessMotionEvent view) {
         mView = view;
-        final String[] deviceList = context.getResources().getStringArray(
-                R.array.sudden_jumping_touch_event_device_list);
-        mNeedsSuddenJumpingHack = needsSuddenJumpingHack(Build.HARDWARE, deviceList);
-    }
-
-    private static boolean needsSuddenJumpingHack(String deviceName, String[] deviceList) {
-        for (String device : deviceList) {
-            if (device.equalsIgnoreCase(deviceName)) {
-                return true;
-            }
-        }
-        return false;
+        mNeedsSuddenJumpingHack = Boolean.parseBoolean(Utils.getDeviceOverrideValue(
+                context.getResources(), R.array.sudden_jumping_touch_event_device_list, "false"));
     }
 
     public void setKeyboard(Keyboard newKeyboard) {
@@ -151,6 +143,9 @@ public class SuddenJumpingTouchEventHandler {
         if (handleSuddenJumping(me)) {
             if (DEBUG_MODE)
                 Log.w(TAG, "onTouchEvent: ignore sudden jump " + me);
+            if (ProductionFlag.IS_EXPERIMENTAL) {
+                ResearchLogger.suddenJumpingTouchEventHandler_onTouchEvent(me);
+            }
             return true;
         }
         return mView.processMotionEvent(me);

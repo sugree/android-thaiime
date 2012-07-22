@@ -15,19 +15,17 @@
 -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.sugree.inputmethod.latin.tests">
+    package="com.android.inputmethod.latin.tests">
 
     <uses-permission android:name="android.permission.READ_CONTACTS" />
 
     <application>
         <uses-library android:name="android.test.runner" />
         <!-- meta-data android:name="com.android.contacts.iconset" android:resource="@xml/iconset" /-->
-        <uses-permission android:name="android.permission.READ_CONTACTS" />
-
     </application>
 
     <instrumentation android:name="android.test.InstrumentationTestRunner"
-        android:targetPackage="com.sugree.inputmethod.latin"
+        android:targetPackage="com.android.inputmethod.latin"
         android:label="LatinIME tests">
     </instrumentation>
 </manifest>

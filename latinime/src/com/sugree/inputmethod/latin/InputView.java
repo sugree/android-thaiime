@@ -16,8 +16,6 @@
 
 package com.sugree.inputmethod.latin;
 
-import com.sugree.inputmethod.latin.R;
-
 import android.content.Context;
 import android.graphics.Rect;
 import android.util.AttributeSet;

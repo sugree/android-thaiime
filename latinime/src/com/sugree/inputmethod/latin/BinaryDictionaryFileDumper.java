@@ -49,21 +49,33 @@ public class BinaryDictionaryFileDumper {
      */
     private static final int FILE_READ_BUFFER_SIZE = 1024;
     // TODO: make the following data common with the native code
-    private static final byte[] MAGIC_NUMBER = new byte[] { 0x78, (byte)0xB1 };
+    private static final byte[] MAGIC_NUMBER_VERSION_1 =
+            new byte[] { (byte)0x78, (byte)0xB1, (byte)0x00, (byte)0x00 };
+    private static final byte[] MAGIC_NUMBER_VERSION_2 =
+            new byte[] { (byte)0x9B, (byte)0xC1, (byte)0x3A, (byte)0xFE };
 
     private static final String DICTIONARY_PROJECTION[] = { "id" };
+
+    public static final String QUERY_PARAMETER_MAY_PROMPT_USER = "mayPrompt";
+    public static final String QUERY_PARAMETER_TRUE = "true";
+    public static final String QUERY_PARAMETER_DELETE_RESULT = "result";
+    public static final String QUERY_PARAMETER_SUCCESS = "success";
+    public static final String QUERY_PARAMETER_FAILURE = "failure";
 
     // Prevents this class to be accidentally instantiated.
     private BinaryDictionaryFileDumper() {
     }
 
     /**
-     * Return for a given locale or dictionary id the provider URI to get the dictionary.
+     * Returns a URI builder pointing to the dictionary pack.
+     *
+     * This creates a URI builder able to build a URI pointing to the dictionary
+     * pack content provider for a specific dictionary id.
      */
-    private static Uri getProviderUri(String path) {
+    private static Uri.Builder getProviderUriBuilder(final String path) {
         return new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT)
                 .authority(BinaryDictionary.DICTIONARY_PACK_AUTHORITY).appendPath(
-                        path).build();
+                        path);
     }
 
     /**
@@ -71,9 +83,13 @@ public class BinaryDictionaryFileDumper {
      * available to copy into Latin IME.
      */
     private static List<WordListInfo> getWordListWordListInfos(final Locale locale,
-            final Context context) {
+            final Context context, final boolean hasDefaultWordList) {
         final ContentResolver resolver = context.getContentResolver();
-        final Uri dictionaryPackUri = getProviderUri(locale.toString());
+        final Uri.Builder builder = getProviderUriBuilder(locale.toString());
+        if (!hasDefaultWordList) {
+            builder.appendQueryParameter(QUERY_PARAMETER_MAY_PROMPT_USER, QUERY_PARAMETER_TRUE);
+        }
+        final Uri dictionaryPackUri = builder.build();
 
         final Cursor c = resolver.query(dictionaryPackUri, DICTIONARY_PROJECTION, null, null, null);
         if (null == c) return Collections.<WordListInfo>emptyList();
@@ -132,7 +148,7 @@ public class BinaryDictionaryFileDumper {
         final int MODE_MIN = COMPRESSED_CRYPTED_COMPRESSED;
         final int MODE_MAX = NONE;
 
-        final Uri wordListUri = getProviderUri(id);
+        final Uri.Builder wordListUriBuilder = getProviderUriBuilder(id);
         final String outputFileName = BinaryDictionaryGetter.getCacheFileName(id, locale, context);
 
         for (int mode = MODE_MIN; mode <= MODE_MAX; ++mode) {
@@ -141,6 +157,7 @@ public class BinaryDictionaryFileDumper {
             File outputFile = null;
             FileOutputStream outputStream = null;
             AssetFileDescriptor afd = null;
+            final Uri wordListUri = wordListUriBuilder.build();
             try {
                 // Open input.
                 afd = openAssetFileDescriptor(resolver, wordListUri);
@@ -177,9 +194,12 @@ public class BinaryDictionaryFileDumper {
                         break;
                     }
                 checkMagicAndCopyFileTo(new BufferedInputStream(inputStream), outputStream);
-                if (0 >= resolver.delete(wordListUri, null, null)) {
+                wordListUriBuilder.appendQueryParameter(QUERY_PARAMETER_DELETE_RESULT,
+                        QUERY_PARAMETER_SUCCESS);
+                if (0 >= resolver.delete(wordListUriBuilder.build(), null, null)) {
                     Log.e(TAG, "Could not have the dictionary pack delete a word list");
                 }
+                BinaryDictionaryGetter.removeFilesWithIdExcept(context, id, outputFile);
                 // Success! Close files (through the finally{} clause) and return.
                 return AssetFileAddress.makeFromFileName(outputFileName);
             } catch (Exception e) {
@@ -196,8 +216,8 @@ public class BinaryDictionaryFileDumper {
             } finally {
                 // Ignore exceptions while closing files.
                 try {
-                    // afd.close() will close inputStream, we should not call inputStream.close().
-                    if (null != afd) afd.close();
+                    // inputStream.close() will close afd, we should not call afd.close().
+                    if (null != inputStream) inputStream.close();
                 } catch (Exception e) {
                     Log.e(TAG, "Exception while closing a cross-process file descriptor : " + e);
                 }
@@ -212,9 +232,11 @@ public class BinaryDictionaryFileDumper {
         // We could not copy the file at all. This is very unexpected.
         // I'd rather not print the word list ID to the log out of security concerns
         Log.e(TAG, "Could not copy a word list. Will not be able to use it.");
-        // If we can't copy it we should probably delete it to avoid trying to copy it over
-        // and over each time we open LatinIME.
-        if (0 >= resolver.delete(wordListUri, null, null)) {
+        // If we can't copy it we should warn the dictionary provider so that it can mark it
+        // as invalid.
+        wordListUriBuilder.appendQueryParameter(QUERY_PARAMETER_DELETE_RESULT,
+                QUERY_PARAMETER_FAILURE);
+        if (0 >= resolver.delete(wordListUriBuilder.build(), null, null)) {
             Log.e(TAG, "In addition, we were unable to delete it.");
         }
         return null;
@@ -231,9 +253,10 @@ public class BinaryDictionaryFileDumper {
      * @throw IOException if the provider-returned data could not be read.
      */
     public static List<AssetFileAddress> cacheWordListsFromContentProvider(final Locale locale,
-            final Context context) {
+            final Context context, final boolean hasDefaultWordList) {
         final ContentResolver resolver = context.getContentResolver();
-        final List<WordListInfo> idList = getWordListWordListInfos(locale, context);
+        final List<WordListInfo> idList = getWordListWordListInfos(locale, context,
+                hasDefaultWordList);
         final List<AssetFileAddress> fileAddressList = new ArrayList<AssetFileAddress>();
         for (WordListInfo id : idList) {
             final AssetFileAddress afd = cacheWordList(id.mId, id.mLocale, resolver, context);
@@ -252,20 +275,23 @@ public class BinaryDictionaryFileDumper {
      * also apply.
      *
      * @param input the stream to be copied.
-     * @param outputFile an outputstream to copy the data to.
+     * @param output an output stream to copy the data to.
      */
     private static void checkMagicAndCopyFileTo(final BufferedInputStream input,
             final FileOutputStream output) throws FileNotFoundException, IOException {
         // Check the magic number
-        final byte[] magicNumberBuffer = new byte[MAGIC_NUMBER.length];
-        final int readMagicNumberSize = input.read(magicNumberBuffer, 0, MAGIC_NUMBER.length);
-        if (readMagicNumberSize < MAGIC_NUMBER.length) {
+        final int length = MAGIC_NUMBER_VERSION_2.length;
+        final byte[] magicNumberBuffer = new byte[length];
+        final int readMagicNumberSize = input.read(magicNumberBuffer, 0, length);
+        if (readMagicNumberSize < length) {
             throw new IOException("Less bytes to read than the magic number length");
         }
-        if (!Arrays.equals(MAGIC_NUMBER, magicNumberBuffer)) {
-            throw new IOException("Wrong magic number for downloaded file");
+        if (!Arrays.equals(MAGIC_NUMBER_VERSION_2, magicNumberBuffer)) {
+            if (!Arrays.equals(MAGIC_NUMBER_VERSION_1, magicNumberBuffer)) {
+                throw new IOException("Wrong magic number for downloaded file");
+            }
         }
-        output.write(MAGIC_NUMBER);
+        output.write(magicNumberBuffer);
 
         // Actually copy the file
         final byte[] buffer = new byte[FILE_READ_BUFFER_SIZE];

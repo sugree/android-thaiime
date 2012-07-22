@@ -20,15 +20,12 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.AssetFileDescriptor;
-import android.content.res.Resources;
 import android.util.Log;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
 import java.util.Locale;
-
-import com.sugree.inputmethod.latin.R;
 
 /**
  * Helper class to get the address of a mmap'able dictionary file.
@@ -49,6 +46,10 @@ class BinaryDictionaryGetter {
      * Name of the common preferences name to know which word list are on and which are off.
      */
     private static final String COMMON_PREFERENCES_NAME = "LatinImeDictPrefs";
+
+    // Name of the category for the main dictionary
+    private static final String MAIN_DICTIONARY_CATEGORY = "main";
+    public static final String ID_CATEGORY_SEPARATOR = ":";
 
     // Prevents this from being instantiated
     private BinaryDictionaryGetter() {}
@@ -77,7 +78,8 @@ class BinaryDictionaryGetter {
         // This assumes '%' is fully available as a non-separator, normal
         // character in a file name. This is probably true for all file systems.
         final StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < name.length(); ++i) {
+        final int nameLength = name.length();
+        for (int i = 0; i < nameLength; i = name.offsetByCodePoints(i, 1)) {
             final int codePoint = name.codePointAt(i);
             if (isFileNameCharacter(codePoint)) {
                 sb.appendCodePoint(codePoint);
@@ -94,7 +96,8 @@ class BinaryDictionaryGetter {
      */
     private static String getWordListIdFromFileName(final String fname) {
         final StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < fname.length(); ++i) {
+        final int fnameLength = fname.length();
+        for (int i = 0; i < fnameLength; i = fname.offsetByCodePoints(i, 1)) {
             final int codePoint = fname.codePointAt(i);
             if ('%' != codePoint) {
                 sb.appendCodePoint(codePoint);
@@ -154,12 +157,8 @@ class BinaryDictionaryGetter {
      * Returns a file address from a resource, or null if it cannot be opened.
      */
     private static AssetFileAddress loadFallbackResource(final Context context,
-            final int fallbackResId, final Locale locale) {
-        final Resources res = context.getResources();
-        final Locale savedLocale = LocaleUtils.setSystemLocale(res, locale);
-        final AssetFileDescriptor afd = res.openRawResourceFd(fallbackResId);
-        LocaleUtils.setSystemLocale(res, savedLocale);
-
+            final int fallbackResId) {
+        final AssetFileDescriptor afd = context.getResources().openRawResourceFd(fallbackResId);
         if (afd == null) {
             Log.e(TAG, "Found the resource but cannot read it. Is it compressed? resId="
                     + fallbackResId);
@@ -212,7 +211,40 @@ class BinaryDictionaryGetter {
     }
 
     /**
-     * Returns the list of cached files for a specific locale.
+     * Returns the category for a given file name.
+     *
+     * This parses the file name, extracts the category, and returns it. See
+     * {@link #getMainDictId(Locale)} and {@link #isMainWordListId(String)}.
+     * @return The category as a string or null if it can't be found in the file name.
+     */
+    private static String getCategoryFromFileName(final String fileName) {
+        final String id = getWordListIdFromFileName(fileName);
+        final String[] idArray = id.split(ID_CATEGORY_SEPARATOR);
+        if (2 != idArray.length) return null;
+        return idArray[0];
+    }
+
+    /**
+     * Utility class for the {@link #getCachedWordLists} method
+     */
+    private static class FileAndMatchLevel {
+        final File mFile;
+        final int mMatchLevel;
+        public FileAndMatchLevel(final File file, final int matchLevel) {
+            mFile = file;
+            mMatchLevel = matchLevel;
+        }
+    }
+
+    /**
+     * Returns the list of cached files for a specific locale, one for each category.
+     *
+     * This will return exactly one file for each word list category that matches
+     * the passed locale. If several files match the locale for any given category,
+     * this returns the file with the closest match to the locale. For example, if
+     * the passed word list is en_US, and for a category we have an en and an en_US
+     * word list available, we'll return only the en_US one.
+     * Thus, the list will contain as many files as there are categories.
      *
      * @param locale the locale to find the dictionary files for, as a string.
      * @param context the context on which to open the files upon.
@@ -222,22 +254,66 @@ class BinaryDictionaryGetter {
             final Context context) {
         final File[] directoryList = getCachedDirectoryList(context);
         if (null == directoryList) return EMPTY_FILE_ARRAY;
-        final ArrayList<File> cacheFiles = new ArrayList<File>();
+        final HashMap<String, FileAndMatchLevel> cacheFiles =
+                new HashMap<String, FileAndMatchLevel>();
         for (File directory : directoryList) {
             if (!directory.isDirectory()) continue;
             final String dirLocale = getWordListIdFromFileName(directory.getName());
-            if (LocaleUtils.isMatch(LocaleUtils.getMatchLevel(dirLocale, locale))) {
+            final int matchLevel = LocaleUtils.getMatchLevel(dirLocale, locale);
+            if (LocaleUtils.isMatch(matchLevel)) {
                 final File[] wordLists = directory.listFiles();
                 if (null != wordLists) {
                     for (File wordList : wordLists) {
-                        cacheFiles.add(wordList);
+                        final String category = getCategoryFromFileName(wordList.getName());
+                        final FileAndMatchLevel currentBestMatch = cacheFiles.get(category);
+                        if (null == currentBestMatch || currentBestMatch.mMatchLevel < matchLevel) {
+                            cacheFiles.put(category, new FileAndMatchLevel(wordList, matchLevel));
+                        }
                     }
                 }
             }
         }
         if (cacheFiles.isEmpty()) return EMPTY_FILE_ARRAY;
-        return cacheFiles.toArray(EMPTY_FILE_ARRAY);
+        final File[] result = new File[cacheFiles.size()];
+        int index = 0;
+        for (final FileAndMatchLevel entry : cacheFiles.values()) {
+            result[index++] = entry.mFile;
+        }
+        return result;
     }
+
+    /**
+     * Remove all files with the passed id, except the passed file.
+     *
+     * If a dictionary with a given ID has a metadata change that causes it to change
+     * path, we need to remove the old version. The only way to do this is to check all
+     * installed files for a matching ID in a different directory.
+     */
+    public static void removeFilesWithIdExcept(final Context context, final String id,
+            final File fileToKeep) {
+        try {
+            final File canonicalFileToKeep = fileToKeep.getCanonicalFile();
+            final File[] directoryList = getCachedDirectoryList(context);
+            if (null == directoryList) return;
+            for (File directory : directoryList) {
+                // There is one directory per locale. See #getCachedDirectoryList
+                if (!directory.isDirectory()) continue;
+                final File[] wordLists = directory.listFiles();
+                if (null == wordLists) continue;
+                for (File wordList : wordLists) {
+                    final String fileId = getWordListIdFromFileName(wordList.getName());
+                    if (fileId.equals(id)) {
+                        if (!canonicalFileToKeep.equals(wordList.getCanonicalFile())) {
+                            wordList.delete();
+                        }
+                    }
+                }
+            }
+        } catch (java.io.IOException e) {
+            Log.e(TAG, "IOException trying to cleanup files : " + e);
+        }
+    }
+
 
     /**
      * Returns the id associated with the main word list for a specified locale.
@@ -251,7 +327,13 @@ class BinaryDictionaryGetter {
         // This works because we don't include by default different dictionaries for
         // different countries. This actually needs to return the id that we would
         // like to use for word lists included in resources, and the following is okay.
-        return locale.getLanguage().toString();
+        return MAIN_DICTIONARY_CATEGORY + ID_CATEGORY_SEPARATOR + locale.getLanguage().toString();
+    }
+
+    private static boolean isMainWordListId(final String id) {
+        final String[] idArray = id.split(ID_CATEGORY_SEPARATOR);
+        if (2 != idArray.length) return false;
+        return MAIN_DICTIONARY_CATEGORY.equals(idArray[0]);
     }
 
     /**
@@ -261,22 +343,22 @@ class BinaryDictionaryGetter {
      * - Uses a content provider to get a public dictionary set, as per the protocol described
      *   in BinaryDictionaryFileDumper.
      * If that fails:
-     * - Gets a file name from the fallback resource passed as an argument.
+     * - Gets a file name from the built-in dictionary for this locale, if any.
      * If that fails:
      * - Returns null.
-     * @return The address of a valid file, or null.
+     * @return The list of addresses of valid dictionary files, or null.
      */
-    public static List<AssetFileAddress> getDictionaryFiles(final Locale locale,
-            final Context context, final int fallbackResId) {
+    public static ArrayList<AssetFileAddress> getDictionaryFiles(final Locale locale,
+            final Context context) {
 
+        final boolean hasDefaultWordList = DictionaryFactory.isDictionaryAvailable(context, locale);
         // cacheWordListsFromContentProvider returns the list of files it copied to local
         // storage, but we don't really care about what was copied NOW: what we want is the
         // list of everything we ever cached, so we ignore the return value.
-        BinaryDictionaryFileDumper.cacheWordListsFromContentProvider(locale, context);
+        BinaryDictionaryFileDumper.cacheWordListsFromContentProvider(locale, context,
+                hasDefaultWordList);
         final File[] cachedWordLists = getCachedWordLists(locale.toString(), context);
-
         final String mainDictId = getMainDictId(locale);
-
         final DictPackSettings dictPackSettings = new DictPackSettings(context);
 
         boolean foundMainDict = false;
@@ -284,7 +366,7 @@ class BinaryDictionaryGetter {
         // cachedWordLists may not be null, see doc for getCachedDictionaryList
         for (final File f : cachedWordLists) {
             final String wordListId = getWordListIdFromFileName(f.getName());
-            if (wordListId.equals(mainDictId)) {
+            if (isMainWordListId(wordListId)) {
                 foundMainDict = true;
             }
             if (!dictPackSettings.isWordListActive(wordListId)) continue;
@@ -296,8 +378,9 @@ class BinaryDictionaryGetter {
         }
 
         if (!foundMainDict && dictPackSettings.isWordListActive(mainDictId)) {
-            final AssetFileAddress fallbackAsset = loadFallbackResource(context, fallbackResId,
-                    locale);
+            final int fallbackResId =
+                    DictionaryFactory.getMainDictionaryResourceId(context.getResources(), locale);
+            final AssetFileAddress fallbackAsset = loadFallbackResource(context, fallbackResId);
             if (null != fallbackAsset) {
                 fileList.add(fallbackAsset);
             }

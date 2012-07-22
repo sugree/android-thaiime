@@ -17,6 +17,7 @@
 #ifndef LATINIME_CORRECTION_H
 #define LATINIME_CORRECTION_H
 
+#include <assert.h>
 #include <stdint.h>
 #include "correction_state.h"
 
@@ -27,8 +28,7 @@ namespace latinime {
 class ProximityInfo;
 
 class Correction {
-
-public:
+ public:
     typedef enum {
         TRAVERSE_ALL_ON_TERMINAL,
         TRAVERSE_ALL_NOT_ON_TERMINAL,
@@ -37,18 +37,75 @@ public:
         NOT_ON_TERMINAL
     } CorrectionType;
 
+    /////////////////////////
+    // static inline utils //
+    /////////////////////////
+
+    static const int TWO_31ST_DIV_255 = S_INT_MAX / 255;
+    static inline int capped255MultForFullMatchAccentsOrCapitalizationDifference(const int num) {
+        return (num < TWO_31ST_DIV_255 ? 255 * num : S_INT_MAX);
+    }
+
+    static const int TWO_31ST_DIV_2 = S_INT_MAX / 2;
+    inline static void multiplyIntCapped(const int multiplier, int *base) {
+        const int temp = *base;
+        if (temp != S_INT_MAX) {
+            // Branch if multiplier == 2 for the optimization
+            if (multiplier < 0) {
+                if (DEBUG_DICT) {
+                    assert(false);
+                }
+                AKLOGI("--- Invalid multiplier: %d", multiplier);
+            } else if (multiplier == 0) {
+                *base = 0;
+            } else if (multiplier == 2) {
+                *base = TWO_31ST_DIV_2 >= temp ? temp << 1 : S_INT_MAX;
+            } else {
+                // TODO: This overflow check gives a wrong answer when, for example,
+                //       temp = 2^16 + 1 and multiplier = 2^17 + 1.
+                //       Fix this behavior.
+                const int tempRetval = temp * multiplier;
+                *base = tempRetval >= temp ? tempRetval : S_INT_MAX;
+            }
+        }
+    }
+
+    inline static int powerIntCapped(const int base, const int n) {
+        if (n <= 0) return 1;
+        if (base == 2) {
+            return n < 31 ? 1 << n : S_INT_MAX;
+        } else {
+            int ret = base;
+            for (int i = 1; i < n; ++i) multiplyIntCapped(base, &ret);
+            return ret;
+        }
+    }
+
+    inline static void multiplyRate(const int rate, int *freq) {
+        if (*freq != S_INT_MAX) {
+            if (*freq > 1000000) {
+                *freq /= 100;
+                multiplyIntCapped(rate, freq);
+            } else {
+                multiplyIntCapped(rate, freq);
+                *freq /= 100;
+            }
+        }
+    }
+
     Correction(const int typedLetterMultiplier, const int fullWordMultiplier);
+    void resetCorrection();
     void initCorrection(
             const ProximityInfo *pi, const int inputLength, const int maxWordLength);
     void initCorrectionState(const int rootPos, const int childCount, const bool traverseAll);
 
     // TODO: remove
     void setCorrectionParams(const int skipPos, const int excessivePos, const int transposedPos,
-            const int spaceProximityPos, const int missingSpacePos, const bool useFullEditDistance);
+            const int spaceProximityPos, const int missingSpacePos, const bool useFullEditDistance,
+            const bool doAutoCompletion, const int maxErrors);
     void checkState();
     bool initProcessState(const int index);
 
-    int getOutputIndex();
     int getInputIndex();
 
     virtual ~Correction();
@@ -73,9 +130,16 @@ public:
 
     bool needsToPrune() const;
 
-    int getFreqForSplitTwoWords(
-            const int firstFreq, const int secondFreq, const unsigned short *word);
-    int getFinalFreq(const int freq, unsigned short **word, int* wordLength);
+    int pushAndGetTotalTraverseCount() {
+        return ++mTotalTraverseCount;
+    }
+
+    int getFreqForSplitMultipleWords(
+            const int *freqArray, const int *wordLengthArray, const int wordCount,
+            const bool isSpaceProximity, const unsigned short *word);
+    int getFinalProbability(const int probability, unsigned short **word, int* wordLength);
+    int getFinalProbabilityForSubQueue(const int probability, unsigned short **word,
+            int* wordLength, const int inputLength);
 
     CorrectionType processCharAndCalcState(const int32_t c, const bool isTerminal);
 
@@ -94,21 +158,44 @@ public:
     inline int getTreeParentIndex(const int index) const {
         return mCorrectionStates[index].mParentIndex;
     }
-private:
+
+    class RankingAlgorithm {
+     public:
+        static int calculateFinalProbability(const int inputIndex, const int depth,
+                const int probability, int *editDistanceTable, const Correction* correction,
+                const int inputLength);
+        static int calcFreqForSplitMultipleWords(const int *freqArray, const int *wordLengthArray,
+                const int wordCount, const Correction* correction, const bool isSpaceProximity,
+                const unsigned short *word);
+        static float calcNormalizedScore(const unsigned short* before, const int beforeLength,
+                const unsigned short* after, const int afterLength, const int score);
+        static int editDistance(const unsigned short* before,
+                const int beforeLength, const unsigned short* after, const int afterLength);
+     private:
+        static const int CODE_SPACE = ' ';
+        static const int MAX_INITIAL_SCORE = 255;
+        static const int TYPED_LETTER_MULTIPLIER = 2;
+        static const int FULL_WORD_MULTIPLIER = 2;
+    };
+
+ private:
     inline void incrementInputIndex();
     inline void incrementOutputIndex();
-    inline bool needsToTraverseAllNodes();
     inline void startToTraverseAllNodes();
     inline bool isQuote(const unsigned short c);
     inline CorrectionType processSkipChar(
             const int32_t c, const bool isTerminal, const bool inputIndexIncremented);
+    inline CorrectionType processUnrelatedCorrectionType();
     inline void addCharToCurrentWord(const int32_t c);
+    inline int getFinalProbabilityInternal(const int probability, unsigned short **word,
+            int* wordLength, const int inputLength);
 
     const int TYPED_LETTER_MULTIPLIER;
     const int FULL_WORD_MULTIPLIER;
     const ProximityInfo *mProximityInfo;
 
     bool mUseFullEditDistance;
+    bool mDoAutoCompletion;
     int mMaxEditDistance;
     int mMaxDepth;
     int mInputLength;
@@ -116,6 +203,9 @@ private:
     int mMissingSpacePos;
     int mTerminalInputIndex;
     int mTerminalOutputIndex;
+    int mMaxErrors;
+
+    uint8_t mTotalTraverseCount;
 
     // The following arrays are state buffer.
     unsigned short mWord[MAX_WORD_LENGTH_INTERNAL];
@@ -146,17 +236,11 @@ private:
 
     bool mMatching;
     bool mProximityMatching;
+    bool mAdditionalProximityMatching;
     bool mExceeding;
     bool mTransposing;
     bool mSkipping;
 
-    class RankingAlgorithm {
-    public:
-        static int calculateFinalFreq(const int inputIndex, const int depth,
-                const int freq, int *editDistanceTable, const Correction* correction);
-        static int calcFreqForSplitTwoWords(const int firstFreq, const int secondFreq,
-                const Correction* correction, const unsigned short *word);
-    };
 };
 } // namespace latinime
 #endif // LATINIME_CORRECTION_H
