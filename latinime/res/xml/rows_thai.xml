@@ -24,31 +24,38 @@
     <include
         latin:keyboardLayout="@xml/key_styles_common" />
     <Row
-        latin:keyWidth="10%p"
+        latin:keyWidth="9%p"
     >
         <include
-            latin:keyboardLayout="@xml/rowkeys_thai1" />
-    </Row>
-    <Row
-        latin:keyWidth="10%p"
-    >
-        <include
-            latin:keyboardLayout="@xml/rowkeys_thai2"
-            latin:keyXPos="5%p" />
-    </Row>
-    <Row
-        latin:keyWidth="10%p"
-    >
-        <Key
-            latin:keyStyle="shiftKeyStyle"
-            latin:keyWidth="15%p"
-            latin:visualInsetsRight="1%p" />
-        <include
-            latin:keyboardLayout="@xml/rowkeys_thai3" />
+            latin:keyboardLayout="@xml/rowkeys_thai0" />
         <Key
             latin:keyStyle="deleteKeyStyle"
             latin:keyWidth="fillRight"
             latin:visualInsetsLeft="1%p" />
+    </Row>
+    <Row
+        latin:keyWidth="8%p"
+    >
+        <include
+            latin:keyboardLayout="@xml/rowkeys_thai1"
+            latin:keyXPos="2%p" />
+    </Row>
+    <Row
+        latin:keyWidth="9%p"
+    >
+        <include
+            latin:keyboardLayout="@xml/rowkeys_thai2"
+            latin:keyXPos="1%p" />
+    </Row>
+    <Row
+        latin:keyWidth="9%p"
+    >
+        <Key
+            latin:keyStyle="shiftKeyStyle"
+            latin:keyWidth="10%p"
+            latin:visualInsetsRight="1%p" />
+        <include
+            latin:keyboardLayout="@xml/rowkeys_thai3" />
     </Row>
     <include
         latin:keyboardLayout="@xml/row_qwerty4" />

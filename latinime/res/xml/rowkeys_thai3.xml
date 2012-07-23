@@ -25,59 +25,58 @@
         <case
             latin:keyboardLayoutSetElement="alphabetManualShifted|alphabetShiftLocked|alphabetShiftLockShifted"
         >
-            <!-- U+0E09: "ฉ" THAI CHARACTER CHO CHING -->
+            <Key
+                latin:keyLabel="(" />
+            <Key
+                latin:keyLabel=")" />
             <Key
                 latin:keyLabel="&#x0E09;" />
-            <!-- U+0E2E: "ฮ" THAI CHARACTER HO NOKHUK -->
             <Key
                 latin:keyLabel="&#x0E2E;" />
-            <!-- U+0E12: "ฒ" THAI CHARACTER THO PHUTHAO -->
+            <Key
+                latin:keyLabel="&#x0E3A;" />
+            <Key
+                latin:keyLabel="&#x0E4C;" />
+            <Key
+                latin:keyLabel="\?" />
             <Key
                 latin:keyLabel="&#x0E12;" />
-            <!-- U+0E2C: "ฬ" THAI CHARACTER LO CHULA -->
             <Key
                 latin:keyLabel="&#x0E2C;" />
-            <!-- U+0E26: "ฦ" THAI CHARACTER LU -->
             <Key
                 latin:keyLabel="&#x0E26;" />
-            <!-- U+0E4C: " ์" THAI CHARACTER THANTHAKHAT
-                 U+0E4D: " ํ" THAI CHARACTER NIKHAHIT
-                 U+0E3A: " ฺ" THAI CHARACTER PHINTHU -->
-            <Key
-                latin:keyLabel="&#x0E4C;"
-                latin:moreKeys="&#x0E4D;,&#x0E3A;" />
-            <!-- U+0E47: " ็" THAI CHARACTER MAITAIKHU -->
-            <Key
-                latin:keyLabel="&#x0E47;" />
         </case>
         <default>
-            <!-- U+0E1C: "ผ" THAI CHARACTER PHO PHUNG -->
             <Key
-                latin:keyLabel="&#x0E1C;" />
-            <!-- U+0E1B: "ป" THAI CHARACTER PO PLA
-                 U+0E1A: "บ" THAI CHARACTER BO BAIMAI -->
+                latin:keyLabel="&#x0E1C;"
+                latin:keyHintLabel="(" />
             <Key
                 latin:keyLabel="&#x0E1B;"
-                latin:moreKeys="&#x0E1A;" />
-            <!-- U+0E2D: "อ" THAI CHARACTER O ANG -->
+                latin:keyHintLabel=")" />
             <Key
-                latin:keyLabel="&#x0E2D;" />
-            <!-- U+0E17: "ท" THAI CHARACTER THO THAHAN -->
+                latin:keyLabel="&#x0E41;"
+                latin:keyHintLabel="&#x0E09;" />
             <Key
-                latin:keyLabel="&#x0E17;" />
-            <!-- U+0E21: "ม" THAI CHARACTER MO MA -->
+                latin:keyLabel="&#x0E2D;"
+                latin:keyHintLabel="&#x0E2E;" />
             <Key
-                latin:keyLabel="&#x0E21;" />
-            <!-- U+0E1D: "ฝ" THAI CHARACTER FO FA -->
+                latin:keyLabel="&#x0E34;"
+                latin:keyHintLabel="&#x0E3A;" />
             <Key
-                latin:keyLabel="&#x0E1D;" />
-            <!-- U+0E48: " ่" THAI CHARACTER MAI EK
-                 U+0E49: " ้" THAI CHARACTER MAI THO
-                 U+0E4A: " ๊" THAI CHARACTER MAI TRI
-                 U+0E4B: " ๋" THAI CHARACTER MAI CHATTAWA -->
+                latin:keyLabel="&#x0E37;"
+                latin:keyHintLabel="&#x0E4C;" />
             <Key
-                latin:keyLabel="&#x0E48;"
-                latin:moreKeys="&#x0E49;,&#x0E4A;,&#x0E4B;" />
+                latin:keyLabel="&#x0E17;"
+                latin:keyHintLabel="&#x0063;" />
+            <Key
+                latin:keyLabel="&#x0E21;"
+                latin:keyHintLabel="&#x0E12;" />
+            <Key
+                latin:keyLabel="&#x0E43;"
+                latin:keyHintLabel="&#x0E2C;" />
+            <Key
+                latin:keyLabel="&#x0E1D;"
+                latin:keyHintLabel="&#x0E26;" />
         </default>
     </switch>
 </merge>

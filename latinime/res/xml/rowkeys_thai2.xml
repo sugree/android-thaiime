@@ -58,50 +58,39 @@
                 latin:moreKeys="&#x0E2F;" />
         </case>
         <default>
-            <!-- U+0E1F: "ฟ" THAI CHARACTER FO FAN
-                 U+0E1E: "พ" THAI CHARACTER PHO PHAN -->
             <Key
                 latin:keyLabel="&#x0E1F;"
-                latin:moreKeys="&#x0E1E;" />
-            <!-- U+0E2B: "ห" THAI CHARACTER HO HIP -->
+                latin:keyHintLabel="&#x0E24;" />
             <Key
-                latin:keyLabel="&#x0E2B;" />
-            <!-- U+0E01: "ก" THAI CHARACTER KO KAI -->
+                latin:keyLabel="&#x0E2B;"
+                latin:keyHintLabel="&#x0E06;" />
             <Key
-                latin:keyLabel="&#x0E01;" />
-            <!-- U+0E14: "ด" THAI CHARACTER DO DEK -->
+                latin:keyLabel="&#x0E01;"
+                latin:keyHintLabel="&#x0E0F;" />
             <Key
-                latin:keyLabel="&#x0E14;" />
-            <!-- U+0E2A: "ส" THAI CHARACTER SO SUA -->
+                latin:keyLabel="&#x0E14;"
+                latin:keyHintLabel="&#x0E42;" />
             <Key
-                latin:keyLabel="&#x0E2A;" />
-            <!-- U+0E27: "ว" THAI CHARACTER WO WAEN -->
+                latin:keyLabel="&#x0E40;"
+                latin:keyHintLabel="&#x0E0C;" />
             <Key
-                latin:keyLabel="&#x0E27;" />
-            <!-- U+0E07: "ง" THAI CHARACTER NGO NGU -->
+                latin:keyLabel="&#x0E49;"
+                latin:keyHintLabel="&#x0E47;" />
             <Key
-                latin:keyLabel="&#x0E07;" />
-            <!-- U+0E30: "ะ" THAI CHARACTER SARA A
-                 U+0E32: "า" THAI CHARACTER SARA AA
-                 U+0E33: " ำ" THAI CHARACTER SARA AM
-                 U+0E40: "เ" THAI CHARACTER SARA E
-                 U+0E41: "แ" THAI CHARACTER SARA AE
-                 U+0E43: "ใ" THAI CHARACTER SARA AI MAIMUAN
-                 U+0E44: "ไ" THAI CHARACTER SARA AI MAIMALAI
-                 U+0E42: "โ" THAI CHARACTER SARA O -->
+                latin:keyLabel="&#x0E48;"
+                latin:keyHintLabel="&#x0E4B;" />
             <Key
-                latin:keyLabel="&#x0E30;"
-                latin:moreKeys="&#x0E32;,&#x0E33;,&#x0E40;,&#x0E41;,&#x0E43;,&#x0E44;,&#x0E42;" />
-            <!-- U+0E31: " ั" THAI CHARACTER MAI HAN-AKAT
-                 U+0E34: " ิ" THAI CHARACTER SARA I
-                 U+0E35: " ี" THAI CHARACTER SARA II
-                 U+0E36: " ึ" THAI CHARACTER SARA UE
-                 U+0E37: " ื" THAI CHARACTER SARA UEE
-                 U+0E38: " ุ" THAI CHARACTER SARA U
-                 U+0E39: " ู" THAI CHARACTER SARA UU -->
+                latin:keyLabel="&#x0E32;"
+                latin:keyHintLabel="&#x0E29;" />
             <Key
-                latin:keyLabel="&#x0E31;"
-                latin:moreKeys="&#x0E34;,&#x0E35;,&#x0E36;,&#x0E37;,&#x0E38;,&#x0E39;" />
+                latin:keyLabel="&#x0E2A;"
+                latin:keyHintLabel="&#x0E28;" />
+            <Key
+                latin:keyLabel="&#x0E27;"
+                latin:keyHintLabel="&#x0E0B;" />
+            <Key
+                latin:keyLabel="&#x0E07;"
+                latin:keyHintLabel="." />
         </default>
     </switch>
 </merge>
