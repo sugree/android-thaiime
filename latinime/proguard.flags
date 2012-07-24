@@ -1,9 +1,9 @@
--keep class com.android.inputmethod.latin.BinaryDictionary {
+-keep class com.sugree.inputmethod.latin.BinaryDictionary {
   int mDictLength;
   <init>(...);
 }
 
--keep class com.android.inputmethod.latin.Flag {
+-keep class com.sugree.inputmethod.latin.Flag {
   *;
 }
 
@@ -11,20 +11,20 @@
   <init>(com.android.inputmethod.keyboard.ProximityInfo);
 }
 
--keep class com.android.inputmethod.latin.Suggest {
+-keep class com.sugree.inputmethod.latin.Suggest {
   <init>(...);
-  com.android.inputmethod.latin.SuggestedWords getSuggestions(...);
+  com.sugree.inputmethod.latin.SuggestedWords getSuggestions(...);
 }
 
--keep class com.android.inputmethod.latin.AutoCorrection {
+-keep class com.sugree.inputmethod.latin.AutoCorrection {
   java.lang.CharSequence getAutoCorrectionWord();
 }
 
--keep class com.android.inputmethod.latin.Utils {
+-keep class com.sugree.inputmethod.latin.Utils {
   boolean equalsIgnoreCase(...);
 }
 
--keep class com.android.inputmethod.latin.spellcheck.SpellCheckerSettingsFragment {
+-keep class com.sugree.inputmethod.latin.spellcheck.SpellCheckerSettingsFragment {
   *;
 }
 
@@ -40,13 +40,13 @@
   <init>(...);
 }
 
--keep class com.android.inputmethod.latin.ResearchLogger {
+-keep class com.sugree.inputmethod.latin.ResearchLogger {
   void setLogFileManager(...);
   void clearAll();
-  com.android.inputmethod.latin.ResearchLogger$LogFileManager getLogFileManager();
+  com.sugree.inputmethod.latin.ResearchLogger$LogFileManager getLogFileManager();
 }
 
--keep class com.android.inputmethod.latin.ResearchLogger$LogFileManager {
+-keep class com.sugree.inputmethod.latin.ResearchLogger$LogFileManager {
   java.lang.String getContents();
 }
 
