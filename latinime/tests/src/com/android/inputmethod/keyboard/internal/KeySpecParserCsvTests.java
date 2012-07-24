@@ -33,10 +33,10 @@ public class KeySpecParserCsvTests extends AndroidTestCase {
         mTextsSet.setLanguage(Locale.ENGLISH.getLanguage());
         mTextsSet.loadStringResources(getContext());
         final String[] testResourceNames = getAllResourceIdNames(
-                com.android.inputmethod.latin.tests.R.string.class);
-        mTextsSet.loadStringResourcesInternal(getTestContext(),
+                com.sugree.inputmethod.latin.tests.R.string.class);
+        mTextsSet.loadStringResourcesInternal(getContext(),
                 testResourceNames,
-                com.android.inputmethod.latin.tests.R.string.empty_string);
+                com.sugree.inputmethod.latin.tests.R.string.empty_string);
     }
 
     private static String[] getAllResourceIdNames(final Class<?> resourceIdClass) {

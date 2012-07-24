@@ -14,14 +14,14 @@
  * the License.
  */
 
-package com.android.inputmethod.latin;
+package com.sugree.inputmethod.latin;
 
 import android.content.Context;
 import android.content.res.Resources;
 import android.test.AndroidTestCase;
 import android.view.inputmethod.InputMethodSubtype;
 
-import com.android.inputmethod.latin.LocaleUtils.RunInLocale;
+import com.sugree.inputmethod.latin.LocaleUtils.RunInLocale;
 
 import java.util.ArrayList;
 import java.util.Locale;

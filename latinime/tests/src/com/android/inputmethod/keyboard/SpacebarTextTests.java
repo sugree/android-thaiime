@@ -21,10 +21,10 @@ import android.content.res.Resources;
 import android.test.AndroidTestCase;
 import android.view.inputmethod.InputMethodSubtype;
 
-import com.android.inputmethod.latin.AdditionalSubtype;
-import com.android.inputmethod.latin.ImfUtils;
-import com.android.inputmethod.latin.StringUtils;
-import com.android.inputmethod.latin.SubtypeLocale;
+import com.sugree.inputmethod.latin.AdditionalSubtype;
+import com.sugree.inputmethod.latin.ImfUtils;
+import com.sugree.inputmethod.latin.StringUtils;
+import com.sugree.inputmethod.latin.SubtypeLocale;
 
 import java.util.ArrayList;
 import java.util.Locale;

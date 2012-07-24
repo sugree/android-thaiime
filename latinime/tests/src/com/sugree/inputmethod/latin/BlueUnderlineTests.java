@@ -14,7 +14,7 @@
  * the License.
  */
 
-package com.android.inputmethod.latin;
+package com.sugree.inputmethod.latin;
 
 import com.android.inputmethod.keyboard.Keyboard;
 

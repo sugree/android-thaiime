@@ -29,7 +29,7 @@ public class MockKeyboardSwitcher implements KeyboardState.SwitchActions {
         public static final boolean SINGLE = true;
         public static final boolean MULTI = false;
         public static final int CAP_MODE_OFF =
-                com.android.inputmethod.latin.Constants.TextUtils.CAP_MODE_OFF;
+                com.sugree.inputmethod.latin.Constants.TextUtils.CAP_MODE_OFF;
         public static final int CAP_MODE_WORDS = TextUtils.CAP_MODE_WORDS;
         public static final int CAP_MODE_CHARACTERS = TextUtils.CAP_MODE_CHARACTERS;
 

@@ -14,9 +14,9 @@
  * the License.
  */
 
-package com.android.inputmethod.latin;
+package com.sugree.inputmethod.latin;
 
-import com.android.inputmethod.latin.R;
+import com.sugree.inputmethod.latin.R;
 
 public class PunctuationTests extends InputTestsBase {
 
