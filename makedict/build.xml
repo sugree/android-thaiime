@@ -13,7 +13,7 @@
   <property name="classes.dir" value="${build.dir}/classes" />
 
   <property name="jar.dist" value="${build.dir}/${ant.project.name}.jar" />
-  <property name="jar.main-class" value="com.android.inputmethod.latin.makedict.DictionaryMaker" />
+  <property name="jar.main-class" value="com.sugree.inputmethod.latin.makedict.DictionaryMaker" />
 
   <path id="project.classpath">
     <pathelement location="${classes.dir}" />

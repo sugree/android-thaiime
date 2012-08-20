@@ -14,7 +14,7 @@
   <property name="classes.dir" value="${build.dir}/classes" />
 
   <property name="jar.dist" value="${build.dir}/${ant.project.name}.jar" />
-  <property name="jar.main-class" value="com.android.inputmethod.latin.maketext.LabelText" />
+  <property name="jar.main-class" value="com.sugree.inputmethod.latin.maketext.LabelText" />
 
   <path id="project.classpath">
     <pathelement location="${classes.dir}" />
